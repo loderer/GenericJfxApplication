@@ -1,7 +1,5 @@
 package sample;
 
-import javafx.event.Event;
-
 public class Observable {
 
     private java.util.Vector data = new java.util.Vector();
@@ -22,25 +20,28 @@ public class Observable {
 
         private static final long serialVersionUID = 1L;
 
+        public String controller;
+
         public String fxId;
 
         public String action;
 
-        UiEvent(Object obj, String fxId, String action) {
+        UiEvent(Object obj, String controller, String fxId, String action) {
             super(obj);
+            this.controller = controller;
             this.fxId = fxId;
             this.action = action;
         }
     }
 
-    public void notifyListeners(final Event event) {
+    public void notifyListeners(final String controller, final String fxId, final String action) {
         java.util.Vector dataCopy;
         synchronized(this) {
             dataCopy = (java.util.Vector)data.clone();
         }
         for (int i=0; i < dataCopy.size(); i++) {
             ((UiEventListener)dataCopy.elementAt(i)).uiEvent(
-                    new UiEvent(this, "fxid", "action")
+                    new UiEvent(this, controller, fxId, action)
             );
         }
     }
