@@ -8,15 +8,30 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    private static final String TITLE = "Sample";
+
+    private static Observable observable;
+
+    public static Observable getObservable() {
+        return observable;
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Sample");
+        FXMLLoader loader = new FXMLLoader();
+        Parent root = loader.load(getClass().getResource("sample.fxml").openStream());
+
+        AbstractController controller = (AbstractController) loader.getController();
+        controller.setObservable(observable);
+
+        primaryStage.setTitle(TITLE);
+
         primaryStage.setScene(new Scene(root, 300, 275));
         primaryStage.show();
         }
 
     public static void main(final String[] args) {
+        observable = new Observable();
         launch(args);
     }
 
