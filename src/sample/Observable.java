@@ -1,29 +1,48 @@
 package sample;
 
+/**
+ * Adapted from here:
+ * http://undocumentedmatlab.com/blog/matlab-callbacks-for-java-events
+ *
+ * An instance of this class can be observed from the MATLAB-backend. It
+ * transfers ui events to the backend.
+ */
 public class Observable {
 
-    private java.util.Vector data = new java.util.Vector();
+    private java.util.Vector listeners = new java.util.Vector();
 
     public synchronized void addUiEventListener(UiEventListener lis) {
-        data.addElement(lis);
+        listeners.addElement(lis);
     }
 
     public synchronized void removeUiEventListener(UiEventListener lis) {
-        data.removeElement(lis);
+        listeners.removeElement(lis);
     }
 
     public interface UiEventListener extends java.util.EventListener {
         void uiEvent(UiEvent event);
     }
 
+    /**
+     * Events to be transferred.
+     */
     public class UiEvent extends java.util.EventObject {
 
         private static final long serialVersionUID = 1L;
 
+        /**
+         * Name of the controller which is the events source.
+         */
         public String controller;
 
+        /**
+         * FxId of the control which initially threw the event.
+         */
         public String fxId;
 
+        /**
+         * The action called on the control.
+         */
         public String action;
 
         UiEvent(Object obj, String controller, String fxId, String action) {
@@ -34,10 +53,16 @@ public class Observable {
         }
     }
 
+    /**
+     * This method sends an event to each observer.
+     * @param controller    Name of the controller which is the events source
+     * @param fxId          FxId of the control which initially threw the event
+     * @param action        Action called on the control
+     */
     public void notifyListeners(final String controller, final String fxId, final String action) {
         java.util.Vector dataCopy;
         synchronized(this) {
-            dataCopy = (java.util.Vector)data.clone();
+            dataCopy = (java.util.Vector) listeners.clone();
         }
         for (int i=0; i < dataCopy.size(); i++) {
             ((UiEventListener)dataCopy.elementAt(i)).uiEvent(

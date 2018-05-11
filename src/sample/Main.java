@@ -8,8 +8,14 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    /**
+     * Title of the application.
+     */
     private static final String TITLE = "Sample";
 
+    /**
+     * The target of the matlab-observer.
+     */
     private static Observable observable;
 
     public static Observable getObservable() {
@@ -36,7 +42,7 @@ public class Main extends Application {
     }
 
     /**
-     * Startet die GUI in einem eigenen Thread.
+     * Starts the ui in its own thread.
      * @param args
      */
     public static void startGui(final String[] args) {
