@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import sample.jfxthread.JFxThread;
 
 public class Main extends Application {
 
@@ -18,8 +19,19 @@ public class Main extends Application {
      */
     private static Observable observable;
 
+    private static Scene scene;
+
+    private static JFxThread jfxThread;
+
+    public static final Object initialisationCompletedMonitor = new Object();
+    public static boolean initialisationCompleted = false;
+
     public static Observable getObservable() {
         return observable;
+    }
+
+    public static JFxThread getJfxThread() {
+        return jfxThread;
     }
 
     @Override
@@ -32,9 +44,17 @@ public class Main extends Application {
 
         primaryStage.setTitle(TITLE);
 
-        primaryStage.setScene(new Scene(root, 300, 275));
+        scene = new Scene(root, 300, 275);
+        primaryStage.setScene(scene);
         primaryStage.show();
+
+        jfxThread = new JFxThread(scene);
+
+        synchronized (initialisationCompletedMonitor) {
+            initialisationCompleted = true;
+            initialisationCompletedMonitor.notify();
         }
+    }
 
     public static void main(final String[] args) {
         observable = new Observable();
@@ -52,5 +72,18 @@ public class Main extends Application {
                 main(args);
             }
         }).start();
+
+        synchronized (initialisationCompletedMonitor) {
+            try {
+                while(!initialisationCompleted) {
+                    initialisationCompletedMonitor.wait();
+                }
+            } catch (InterruptedException e) {
+                // TODO: Fix error handling.
+                e.printStackTrace();
+            }
+
+            jfxThread.applyTask("label", "setTextFill", javafx.scene.paint.Color.GREEN);
+        }
     }
 }

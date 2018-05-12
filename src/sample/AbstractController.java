@@ -8,13 +8,13 @@ import javafx.scene.control.Control;
  */
 public abstract class AbstractController {
     /**
-     * Will be notified if sendEvent is called.
+     * Will be executionFinished if sendEvent is called.
      */
     private Observable observable;
 
     /**
      * Init Controller
-     * @param observable    This observable will be notified if sendEvent is called.
+     * @param observable    This observable will be executionFinished if sendEvent is called.
      */
     public void setObservable(final Observable observable) {
         this.observable = observable;
