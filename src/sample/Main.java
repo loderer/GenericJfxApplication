@@ -82,8 +82,6 @@ public class Main extends Application {
                 // TODO: Fix error handling.
                 e.printStackTrace();
             }
-
-            jfxThread.applyTask("label", "setTextFill", javafx.scene.paint.Color.GREEN);
         }
     }
 }

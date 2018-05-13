@@ -4,9 +4,8 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class JFxThread {
 
@@ -26,13 +25,13 @@ public class JFxThread {
 
     public void pushBackTask(final String fxId, final String method, final Object... args){
         try {
-            List<Class<?>> argsClasses = new ArrayList<Class<?>>();
+            List<Class<?>> argClasses = new ArrayList<Class<?>>();
             for(Object arg : args) {
-                argsClasses.add(arg.getClass());
+                argClasses.add(arg.getClass());
             }
 
             final Object uiControl = scene.lookup("#" + fxId);
-            final java.lang.reflect.Method methodHandle = uiControl.getClass().getMethod(method, argsClasses.toArray(new Class<?>[0]));
+            final java.lang.reflect.Method methodHandle = getMethod(uiControl, method, argClasses);
 
             synchronized (tasksMonitor) {
                 tasks.add(new Task(uiControl, methodHandle, args));
@@ -78,13 +77,13 @@ public class JFxThread {
     public Object applyTask(final String fxId, final String method, final Object... args) {
         Object returnValue = null;
         try {
-            List<Class<?>> argsClasses = new ArrayList<Class<?>>();
+            List<Class<?>> argClasses = new ArrayList<Class<?>>();
             for(Object arg : args) {
-                argsClasses.add(arg.getClass());
+                argClasses.add(arg.getClass());
             }
 
             final Object uiControl = scene.lookup("#" + fxId);
-            final java.lang.reflect.Method methodHandle = uiControl.getClass().getMethod(method, argsClasses.toArray(new Class<?>[0]));
+            final java.lang.reflect.Method methodHandle = getMethod(uiControl, method, argClasses);
 
             final Task task = new Task(uiControl, methodHandle, args);
 
@@ -114,24 +113,82 @@ public class JFxThread {
         return returnValue;
     }
 
-//    // TODO
-//    private Method getMethod(Object uiControl, String method, List<Class<?>> argsClasses, List<Class<?>> permutation) throws NoSuchMethodException {
-//        try {
-//            return uiControl.getClass().getMethod(method, permutation.toArray(new Class<?>[0]));
-//        } catch (NoSuchMethodException e) {
-//            boolean finished = true;
-//            for(Class<?> clss : permutation) {
-//                if(!clss.equals(Object.class)) {
-//                    finished = false;
-//                    break;
-//                }
-//            }
-//            if(finished) {
-//                throw e;
-//            } else {
-//                Iterator<Class<?> >
-//            }
-//        }
-//
-//    }
+    private Method getMethod(Object uiControl, String method, List<Class<?>> argClasses) throws NoSuchMethodException {
+        if(argClasses.size() == 0) {
+            return uiControl.getClass().getMethod(method, argClasses.toArray(new Class<?>[0]));
+        } else {
+            MethodReflector mr = new MethodReflector(uiControl, method, argClasses);
+            return mr.getMethod();
+        }
+    }
+
+    // TODO: teste mit primitiven
+    private class MethodReflector {
+
+        private final Object uiControl;
+        private final String method;
+        private final List<Class<?>> argClasses;
+
+        private List<List<Class<?>>> permutations;
+        private List<Iterator<Class<?>>> permutationIterators;
+        private List<Class<?>> actPermutation;
+
+        public MethodReflector(Object uiControl, String method, List<Class<?>> argClasses) {
+
+            this.uiControl = uiControl;
+            this.method = method;
+            this.argClasses = argClasses;
+
+            this.permutations  = new ArrayList<List<Class<?>>>();
+            this.permutationIterators = new ArrayList<Iterator<Class<?>>>();
+            this.actPermutation = new ArrayList<Class<?>>();
+
+
+            initPermutations(argClasses);
+        }
+
+        private void initPermutations(List<Class<?>> argClasses) {
+            for(int i = 0; i < argClasses.size(); i++) {
+                ArrayList<Class<?>> permutation = new ArrayList<Class<?>>();
+                Class<?> clss = argClasses.get(i);
+                while(!clss.equals(Object.class)) {
+                    permutation.add(clss);
+                    permutation.addAll(Arrays.asList(clss.getInterfaces()));
+                    clss = clss.getSuperclass();
+                }
+                permutation.add(clss);  // add Object.class
+                permutations.add(permutation);
+                Iterator<Class<?>> permutationIterator = permutation.iterator();
+                actPermutation.add(permutationIterator.next());
+                permutationIterators.add(permutationIterator);
+            }
+        }
+
+        public Method getMethod() throws NoSuchMethodException {
+            try {
+                return uiControl.getClass().getMethod(method, actPermutation.toArray(new Class<?>[0]));
+            } catch (NoSuchMethodException e) {
+                if(nextPermutation(0))
+                    return getMethod();
+                else
+                    throw e;
+            }
+        }
+
+        private boolean nextPermutation(final int position) {
+            if(position >= permutationIterators.size())
+                return false;
+            Iterator<Class<?>> permutationIterator = permutationIterators.get(position);
+            if(permutationIterator.hasNext()) {
+                actPermutation.set(position, permutationIterator.next());
+                return true;
+            } else {
+                // Überlauf auf den nächst höherwertigen Iterator
+                permutationIterators.set(position, permutations.get(position).iterator());
+                actPermutation.set(position, permutationIterators.get(position).next());
+                return nextPermutation(position + 1);
+            }
+        }
+    }
+
 }
