@@ -1,11 +1,13 @@
-package sample;
+package sample_app;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import sample.jfxthread.JFxThread;
+import sample_app.events.AbstractController;
+import sample_app.events.Observable;
+import sample_app.jfxthread.JFxThread;
 
 public class Main extends Application {
 
@@ -15,16 +17,21 @@ public class Main extends Application {
     private static final String TITLE = "Sample";
 
     /**
-     * The target of the matlab-observer.
+     * The target of the MATLAB-observer.
      */
     private static Observable observable;
 
-    private static Scene scene;
-
+    /**
+     * This object allows changing the gui from MATLAB.
+     */
     private static JFxThread jfxThread;
 
-    public static final Object initialisationCompletedMonitor = new Object();
-    public static boolean initialisationCompleted = false;
+    /**
+     * This flag indicates the initialization-status of the application.
+     * The attributes are initialized if the flag is set.
+     */
+    private static boolean initialisationCompleted = false;
+    private static final Object initialisationCompletedMonitor = new Object();
 
     public static Observable getObservable() {
         return observable;
@@ -37,14 +44,14 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         FXMLLoader loader = new FXMLLoader();
-        Parent root = loader.load(getClass().getResource("sample.fxml").openStream());
+        Parent root = loader.load(getClass().getResource("sample/sample.fxml").openStream());
 
         AbstractController controller = (AbstractController) loader.getController();
         controller.setObservable(observable);
 
         primaryStage.setTitle(TITLE);
 
-        scene = new Scene(root, 300, 275);
+        Scene scene = new Scene(root, 300, 275);
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -79,7 +86,6 @@ public class Main extends Application {
                     initialisationCompletedMonitor.wait();
                 }
             } catch (InterruptedException e) {
-                // TODO: Fix error handling.
                 e.printStackTrace();
             }
         }

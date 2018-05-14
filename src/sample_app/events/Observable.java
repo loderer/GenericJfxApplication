@@ -1,4 +1,4 @@
-package sample;
+package sample_app.events;
 
 /**
  * Adapted from here:

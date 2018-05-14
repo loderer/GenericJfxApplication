@@ -1,21 +1,41 @@
-package sample.jfxthread;
+package sample_app.jfxthread;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class SyncTask implements Runnable{
+/**
+ * The application requires the synchronous execution of an runnable to easily
+ * fetch information from the gui. This implementation allows to wait till the
+ * execution has finished. It also enables fetching the result of the executed
+ * task.
+ */
+public class SyncTaskExecution implements Runnable{
 
+    /**
+     * Task to be executed.
+     */
     private Task task;
+
+    /**
+     * Flag indicating if the execution has finished.
+     */
     private boolean executionFinished;
     public Object monitor;
+
+    /**
+     * Return value of the task.
+     */
     public Object returnValue;
 
-    public SyncTask(final Task task) {
+    public SyncTaskExecution(final Task task) {
         this.task = task;
         this.executionFinished = false;
         this.monitor = new Object();
         this.returnValue = null;
     }
 
+    /**
+     * Publishes that the execution has finished and the return value is available.
+     */
     public void finishExecution() {
         synchronized (monitor) {
             executionFinished = true;

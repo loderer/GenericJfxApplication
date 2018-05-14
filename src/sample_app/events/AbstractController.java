@@ -1,4 +1,4 @@
-package sample;
+package sample_app.events;
 
 import javafx.event.Event;
 import javafx.scene.control.Control;
@@ -35,5 +35,5 @@ public abstract class AbstractController {
      * Discovers the class-name of the derivative.
      * @return
      */
-    abstract String getControllerName();
+    public abstract String getControllerName();
 }

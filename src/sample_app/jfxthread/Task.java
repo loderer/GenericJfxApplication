@@ -1,5 +1,8 @@
-package sample.jfxthread;
+package sample_app.jfxthread;
 
+/**
+ * A task represents the invocation of a method on an ui-element.
+ */
 public class Task {
     /**
      * FxId of an ui element.
