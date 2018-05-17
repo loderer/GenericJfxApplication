@@ -6,7 +6,8 @@ import javafx.scene.control.Control;
 /**
  * Each controllers base class. It allows to send events via the observable.
  */
-public abstract class AbstractController {
+public class Controller {
+
     /**
      * Will be executionFinished if sendEvent is called.
      */
@@ -26,14 +27,7 @@ public abstract class AbstractController {
      */
     public void sendEvent(Event evt) {
         observable.notifyListeners(
-                getControllerName(),
                 ((Control)evt.getSource()).getId(),
                 evt.getEventType().getName());
     }
-
-    /**
-     * Discovers the class-name of the derivative.
-     * @return
-     */
-    public abstract String getControllerName();
 }

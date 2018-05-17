@@ -8,11 +8,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import sample_app.events.AbstractController;
+import sample_app.events.Controller;
 import sample_app.events.Observable;
 import sample_app.jfxthread.JFxThread;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main extends Application {
 
@@ -20,16 +22,15 @@ public class Main extends Application {
      * Title of the application.
      */
     private static final String TITLE = "Sample";
+    private static final String PRIMARY_STAGE_OBSERVABLE = "primaryStage";
 
     /**
      * Primary stage of the application.
      */
     private static Stage primaryStage;
 
-    /**
-     * The target of the MATLAB-observer.
-     */
-    private static Observable observable;
+    //TODO documentation
+    private static Map<String, Observable> observables;
 
     /**
      * This object allows changing the gui from MATLAB.
@@ -50,44 +51,54 @@ public class Main extends Application {
         // Do not implicitly shutdown the JavaFX runtime when the last window
         // is closed. This enables restarting the application.
         Platform.setImplicitExit(false);
-        observable = new Observable();
+
+        observables = new HashMap<String, Observable>();
+        observables.put(PRIMARY_STAGE_OBSERVABLE, new Observable());
+
         jfxThread = new JFxThread();
-        initAndShowApplication();
-    }
-
-    /**
-     * Initialize the contents of the user interface.
-     * @throws java.io.IOException  If the specified fxml-file is not
-     * available.
-     */
-    private static void initAndShowApplication() throws IOException {
-        FXMLLoader loader = new FXMLLoader();
-        Parent root = loader.load(Main.class.getResource("sample/sample.fxml")
-                .openStream());
-
-        AbstractController controller =
-                (AbstractController) loader.getController();
-        controller.setObservable(observable);
 
         primaryStage.setTitle(TITLE);
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
-                observable.notifyListeners("root", "root", "CLOSE");
+                observables.get("primaryStage").notifyListeners("root", "CLOSE");
             }
         });
-
-        Scene scene = new Scene(root, 300, 275);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-
-        jfxThread.setScene(scene);
 
         synchronized (initialisationCompletedMonitor) {
             initialisationCompleted = true;
             initialisationCompletedMonitor.notify();
         }
+    }
+
+
+    public static UiHandle showScene(final String fxmlFile) {
+        Observable observable = new Observable();
+        observables.put(fxmlFile, observable);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    FXMLLoader loader = new FXMLLoader();
+                    Parent root = loader.load(Main.class.getResource(fxmlFile)
+                            .openStream());
+
+                    Controller controller =
+                            (Controller) loader.getController();
+                    controller.setObservable(observables.get(fxmlFile));
+
+                    Scene scene = new Scene(root, 300, 275);
+                    primaryStage.setScene(scene);
+                    primaryStage.show();
+
+                    jfxThread.setScene(scene);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return new UiHandle(observable, jfxThread);
     }
 
     /**
@@ -98,34 +109,17 @@ public class Main extends Application {
         try {
             launch(args);
         } catch(IllegalStateException e) {
-            // The ui is still running. Reset controls and show primary stage.
-            restartGui();
+            // The ui is still running.
         }
-    }
-    /**
-
-     * Resets and shows a running JavaFX-application.
-     */
-    private static void restartGui() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    initAndShowApplication();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        });
     }
 
     /**
      * Starts the ui in its own thread. A call returns if all public
      * properties are initialized.
      * @param args
-     * @return UiHandle which allows to interact with the ui.
+     * @return Observable to listen for events on primaryStage level.
      */
-    public static UiHandle startGuiThread(final String[] args)
+    public static Observable startGuiThread(final String[] args)
             throws InterruptedException {
         new Thread(new Runnable() {
             @Override
@@ -139,6 +133,6 @@ public class Main extends Application {
                 initialisationCompletedMonitor.wait();
             }
         }
-        return new UiHandle(observable, jfxThread);
+        return observables.get(PRIMARY_STAGE_OBSERVABLE);
     }
 }

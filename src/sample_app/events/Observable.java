@@ -13,10 +13,14 @@ public class Observable {
 
     public synchronized void addUiEventListener(UiEventListener lis) {
         listeners.addElement(lis);
+
+        System.out.println("add listener"); 
     }
 
     public synchronized void removeUiEventListener(UiEventListener lis) {
         listeners.removeElement(lis);
+
+        System.out.println("remove listener");
     }
 
     public interface UiEventListener extends java.util.EventListener {
@@ -31,11 +35,6 @@ public class Observable {
         private static final long serialVersionUID = 1L;
 
         /**
-         * Name of the controller which is the events source.
-         */
-        public String controller;
-
-        /**
          * FxId of the control which initially threw the event.
          */
         public String fxId;
@@ -45,9 +44,8 @@ public class Observable {
          */
         public String action;
 
-        UiEvent(Object obj, String controller, String fxId, String action) {
+        UiEvent(Object obj, String fxId, String action) {
             super(obj);
-            this.controller = controller;
             this.fxId = fxId;
             this.action = action;
         }
@@ -55,18 +53,17 @@ public class Observable {
 
     /**
      * This method sends an event to each observer.
-     * @param controller    Name of the controller which is the events source
      * @param fxId          FxId of the control which initially threw the event
      * @param action        Action called on the control
      */
-    public void notifyListeners(final String controller, final String fxId, final String action) {
+    public void notifyListeners(final String fxId, final String action) {
         java.util.Vector dataCopy;
         synchronized(this) {
             dataCopy = (java.util.Vector) listeners.clone();
         }
         for (int i=0; i < dataCopy.size(); i++) {
             ((UiEventListener)dataCopy.elementAt(i)).uiEvent(
-                    new UiEvent(this, controller, fxId, action)
+                    new UiEvent(this, fxId, action)
                 );
         }
     }
