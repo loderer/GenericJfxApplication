@@ -41,14 +41,6 @@ public class Main extends Application {
     private static boolean initialisationCompleted = false;
     private static final Object initialisationCompletedMonitor = new Object();
 
-    public static Observable getObservable() {
-        return observable;
-    }
-
-    public static JFxThread getJfxThread() {
-        return jfxThread;
-    }
-
     @Override
     public void start(Stage primaryStage) throws Exception{
         // Save primary stage to enable restarting the application.
@@ -122,8 +114,10 @@ public class Main extends Application {
      * Starts the ui in its own thread. A call returns if all public
      * properties are initialized.
      * @param args
+     * @return UiHandle which allows to interact with the ui.
      */
-    public static void startGuiThread(final String[] args) throws InterruptedException {
+    public static UiHandle startGuiThread(final String[] args)
+            throws InterruptedException {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -136,5 +130,6 @@ public class Main extends Application {
                 initialisationCompletedMonitor.wait();
             }
         }
+        return new UiHandle(observable, jfxThread);
     }
 }

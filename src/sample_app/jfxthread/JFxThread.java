@@ -11,7 +11,7 @@ import java.util.*;
  * Allows the invocation of any available method on each existing ui-element
  * from MATLAB.
  */
-public class JFxThread {
+public class JFxThread implements JFxThreadInterface {
 
     /**
      * Scene housing the ui-elements.
@@ -33,21 +33,12 @@ public class JFxThread {
         this.tasks = new ArrayList<Task>();
     }
 
-    /**
-     * Deposit a task without parameters.
-     * @param fxId      The ui-element to invoke the method on.
-     * @param method    The method to be invoked on the ui-element.
-     */
+    @Override
     public void pushBackTask(final String fxId, final String method){
         pushBackTask(fxId, method, new Object[0]);
     }
 
-    /**
-     * Deposit a task.
-     * @param fxId      The ui-element to invoke the method on.
-     * @param method    The method to be invoked on the ui-element.
-     * @param args      The arguments of the method.
-     */
+    @Override
     public void pushBackTask(final String fxId, final String method,
                              final Object... args){
         try {
@@ -77,10 +68,7 @@ public class JFxThread {
         }
     }
 
-    /**
-     * Executes the deposited tasks in the order they were submitted.
-     * After execution the list of deposited tasks is cleared.
-     */
+    @Override
     public void applyTasks() {
         Platform.runLater(new Runnable() {
             @Override
@@ -102,23 +90,12 @@ public class JFxThread {
         });
     }
 
-    /**
-     * Run a task without parameters synchronous.
-     * @param fxId      The ui-element to invoke the method on.
-     * @param method    The method to be invoked on the ui-element.
-     * @return          Result of the method invocation.
-     */
+    @Override
     public Object applyTask(final String fxId, final String method) {
         return applyTask(fxId, method, new Object[0]);
     }
 
-    /**
-     * Run a task with parameters synchronous.
-     * @param fxId      The ui-element to invoke the method on.
-     * @param method    The method to be invoked on the ui-element.
-     * @param args      The arguments of the method.
-     * @return          Result of the method invocation.
-     */
+    @Override
     public Object applyTask(final String fxId, final String method,
                             final Object... args) {
         Object returnValue = null;
