@@ -19,6 +19,9 @@ public class Main extends Application {
      */
     private static final String TITLE = "Sample";
 
+    /**
+     * Primary stage of the application.
+     */
     private static Stage primaryStage;
 
     /**
@@ -48,17 +51,28 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        this.primaryStage = primaryStage;
-        startApplication(primaryStage);
+        // Save primary stage to enable restarting the application.
+        Main.primaryStage = primaryStage;
+        // Do not implicitly shutdown the JavaFX runtime when the last window
+        // is closed. This enables restarting the application.
+        Platform.setImplicitExit(false);
+        initAndShowApplication();
     }
 
-    private static void startApplication(final Stage primaryStage) throws java.io.IOException {
+    /**
+     * Initialize the contents of the user interface.
+     * @throws java.io.IOException  If the specified fxml-file is not
+     * available.
+     */
+    private static void initAndShowApplication() throws IOException {
         observable = new Observable();
 
         FXMLLoader loader = new FXMLLoader();
-        Parent root = loader.load(Main.class.getResource("sample/sample.fxml").openStream());
+        Parent root = loader.load(Main.class.getResource("sample/sample.fxml")
+                .openStream());
 
-        AbstractController controller = (AbstractController) loader.getController();
+        AbstractController controller =
+                (AbstractController) loader.getController();
         controller.setObservable(observable);
 
         primaryStage.setTitle(TITLE);
@@ -66,15 +80,6 @@ public class Main extends Application {
         Scene scene = new Scene(root, 300, 275);
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        Platform.setImplicitExit(false);
-//        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-//            @Override
-//            public void handle(WindowEvent event) {
-//                primaryStage.hide();
-//                event.consume();
-//            }
-//        });
 
         jfxThread = new JFxThread(scene);
 
@@ -84,43 +89,51 @@ public class Main extends Application {
         }
     }
 
-    public static void main(final String[] args) {
+    /**
+     * Starts the ui. A call returns after application termination.
+     * @param args
+     */
+    private static void startGui(final String[] args) {
         try {
             launch(args);
         } catch(IllegalStateException e) {
-            System.err.println("Don't launch twice.");
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        startApplication(primaryStage);
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                }
-            });
+            // The ui is still running. Reset controls and show primary stage.
+            restartGui();
         }
+    }
+    /**
+
+     * Resets and shows a running JavaFX-application.
+     */
+    private static void restartGui() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    initAndShowApplication();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
-     * Starts the ui in its own thread.
+     * Starts the ui in its own thread. A call returns if all public
+     * properties are initialized.
      * @param args
      */
-    public static void startGui(final String[] args) {
+    public static void startGuiThread(final String[] args) throws InterruptedException {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                main(args);
+                startGui(args);
             }
         }).start();
 
         synchronized (initialisationCompletedMonitor) {
-            try {
-                while(!initialisationCompleted) {
-                    initialisationCompletedMonitor.wait();
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            while(!initialisationCompleted) {
+                initialisationCompletedMonitor.wait();
             }
         }
     }
