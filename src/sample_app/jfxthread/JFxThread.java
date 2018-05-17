@@ -16,7 +16,7 @@ public class JFxThread implements JFxThreadInterface {
     /**
      * Scene housing the ui-elements.
      */
-    private final Scene scene;
+    private Scene scene;
 
     /**
      * Deposited tasks.
@@ -24,13 +24,13 @@ public class JFxThread implements JFxThreadInterface {
     private List<Task> tasks;
     private final Object tasksMonitor;
 
-    /**
-     * @param scene Scene housing the ui-elements.
-     */
-    public JFxThread(final Scene scene) {
-        this.scene = scene;
+    public JFxThread() {
         this.tasksMonitor = new Object();
         this.tasks = new ArrayList<Task>();
+    }
+
+    public void setScene(final Scene scene ){
+        this.scene = scene;
     }
 
     @Override

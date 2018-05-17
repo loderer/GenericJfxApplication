@@ -67,7 +67,7 @@ public class Observable {
         for (int i=0; i < dataCopy.size(); i++) {
             ((UiEventListener)dataCopy.elementAt(i)).uiEvent(
                     new UiEvent(this, controller, fxId, action)
-            );
+                );
         }
     }
 }

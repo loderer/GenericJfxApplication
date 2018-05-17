@@ -2,10 +2,12 @@ package sample_app;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import sample_app.events.AbstractController;
 import sample_app.events.Observable;
 import sample_app.jfxthread.JFxThread;
@@ -48,6 +50,8 @@ public class Main extends Application {
         // Do not implicitly shutdown the JavaFX runtime when the last window
         // is closed. This enables restarting the application.
         Platform.setImplicitExit(false);
+        observable = new Observable();
+        jfxThread = new JFxThread();
         initAndShowApplication();
     }
 
@@ -57,8 +61,6 @@ public class Main extends Application {
      * available.
      */
     private static void initAndShowApplication() throws IOException {
-        observable = new Observable();
-
         FXMLLoader loader = new FXMLLoader();
         Parent root = loader.load(Main.class.getResource("sample/sample.fxml")
                 .openStream());
@@ -73,7 +75,7 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        jfxThread = new JFxThread(scene);
+        jfxThread.setScene(scene);
 
         synchronized (initialisationCompletedMonitor) {
             initialisationCompleted = true;
