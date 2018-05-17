@@ -13,14 +13,10 @@ public class Observable {
 
     public synchronized void addUiEventListener(UiEventListener lis) {
         listeners.addElement(lis);
-
-        System.out.println("add listener"); 
     }
 
     public synchronized void removeUiEventListener(UiEventListener lis) {
         listeners.removeElement(lis);
-
-        System.out.println("remove listener");
     }
 
     public interface UiEventListener extends java.util.EventListener {
