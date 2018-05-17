@@ -1,6 +1,7 @@
 package sample_app;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -9,12 +10,16 @@ import sample_app.events.AbstractController;
 import sample_app.events.Observable;
 import sample_app.jfxthread.JFxThread;
 
+import java.io.IOException;
+
 public class Main extends Application {
 
     /**
      * Title of the application.
      */
     private static final String TITLE = "Sample";
+
+    private static Stage primaryStage;
 
     /**
      * The target of the MATLAB-observer.
@@ -43,8 +48,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+        this.primaryStage = primaryStage;
+        startApplication(primaryStage);
+    }
+
+    private static void startApplication(final Stage primaryStage) throws java.io.IOException {
+        observable = new Observable();
+
         FXMLLoader loader = new FXMLLoader();
-        Parent root = loader.load(getClass().getResource("sample/sample.fxml").openStream());
+        Parent root = loader.load(Main.class.getResource("sample/sample.fxml").openStream());
 
         AbstractController controller = (AbstractController) loader.getController();
         controller.setObservable(observable);
@@ -55,6 +67,15 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+        Platform.setImplicitExit(false);
+//        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+//            @Override
+//            public void handle(WindowEvent event) {
+//                primaryStage.hide();
+//                event.consume();
+//            }
+//        });
+
         jfxThread = new JFxThread(scene);
 
         synchronized (initialisationCompletedMonitor) {
@@ -64,8 +85,21 @@ public class Main extends Application {
     }
 
     public static void main(final String[] args) {
-        observable = new Observable();
-        launch(args);
+        try {
+            launch(args);
+        } catch(IllegalStateException e) {
+            System.err.println("Don't launch twice.");
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        startApplication(primaryStage);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     /**
