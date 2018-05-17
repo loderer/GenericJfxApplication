@@ -71,6 +71,13 @@ public class Main extends Application {
 
         primaryStage.setTitle(TITLE);
 
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                observable.notifyListeners("root", "root", "CLOSE");
+            }
+        });
+
         Scene scene = new Scene(root, 300, 275);
         primaryStage.setScene(scene);
         primaryStage.show();
