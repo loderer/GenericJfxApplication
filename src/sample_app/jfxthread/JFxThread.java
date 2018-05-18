@@ -24,9 +24,15 @@ public class JFxThread implements JFxThreadInterface {
     private List<Task> tasks;
     private final Object tasksMonitor;
 
-    public JFxThread() {
+    /**
+     * The corresponding fxml-file.
+     */
+    private final String fxmlFile;
+
+    public JFxThread(final String fxmlFile) {
         this.tasksMonitor = new Object();
         this.tasks = new ArrayList<Task>();
+        this.fxmlFile = fxmlFile;
     }
 
     public void setScene(final Scene scene ){
@@ -80,13 +86,14 @@ public class JFxThread implements JFxThreadInterface {
                 }
                 classes = classes.substring(2);
 
-                System.err.println(String.format("The ui-element with the fxId \"%s\" " +
-                        "does not provide a method with the name \"%s\" and parameter " +
-                        "of classes \"%s\".", fxId, method, classes));
+                System.err.println(String.format("The ui-element does not " +
+                        "provide a method with the name \"%s\" and parameter " +
+                        "of classes \"%s\". (fxId: %s, fxml: %s)", method,
+                        classes, fxId, fxmlFile));
             }
         } else {
             System.err.println(String.format("There is no ui-element with the " +
-                    "id: \"%s\" in this scene.", fxId));
+                    "id: \"%s\" in this scene. (fxml: %s)", fxId, fxmlFile));
         }
         return task;
     }

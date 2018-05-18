@@ -75,7 +75,7 @@ public class Main extends Application {
         final Observable observable = new Observable();
         observables.put(fxmlFile, observable);
 
-        final JFxThread jfxThread = new JFxThread();
+        final JFxThread jfxThread = new JFxThread(fxmlFile);
         jfxThreads.put(fxmlFile, jfxThread);
 
         Platform.runLater(new Runnable() {
