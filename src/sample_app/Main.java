@@ -32,10 +32,8 @@ public class Main extends Application {
     //TODO documentation
     private static Map<String, Observable> observables;
 
-    /**
-     * This object allows changing the gui from MATLAB.
-     */
-    private static JFxThread jfxThread; //TODO: jfxThread for each observable/scene
+    //TODO documentation
+    private static Map<String, JFxThread> jfxThreads;
 
     /**
      * This flag indicates the initialization-status of the application.
@@ -55,7 +53,7 @@ public class Main extends Application {
         observables = new HashMap<String, Observable>();
         observables.put(PRIMARY_STAGE_OBSERVABLE, new Observable());
 
-        jfxThread = new JFxThread();
+        jfxThreads = new HashMap<String, JFxThread>();
 
         primaryStage.setTitle(TITLE);
 
@@ -74,8 +72,12 @@ public class Main extends Application {
 
 
     public static UiHandle showScene(final String fxmlFile) {
-        Observable observable = new Observable();
+        final Observable observable = new Observable();
         observables.put(fxmlFile, observable);
+
+        final JFxThread jfxThread = new JFxThread();
+        jfxThreads.put(fxmlFile, jfxThread);
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -86,7 +88,7 @@ public class Main extends Application {
 
                     Controller controller =
                             (Controller) loader.getController();
-                    controller.setObservable(observables.get(fxmlFile));
+                    controller.setObservable(observable);
 
                     Scene scene = new Scene(root, 300, 275);
                     primaryStage.setScene(scene);
@@ -98,6 +100,7 @@ public class Main extends Application {
                 }
             }
         });
+
         return new UiHandle(observable, jfxThread);
     }
 
