@@ -41,31 +41,54 @@ public class JFxThread implements JFxThreadInterface {
     @Override
     public void pushBackTask(final String fxId, final String method,
                              final Object... args){
-        try {
-            // Fetch parameter classes.
-            List<Class<?>> argClasses = new ArrayList<Class<?>>();
-            for(Object arg : args) {
-                argClasses.add(arg.getClass());
-            }
+        Task task = getTask(fxId, method, args);
 
-            final Object uiControl = scene.lookup("#" + fxId);
-            final java.lang.reflect.Method methodHandle =
-                    getMethod(uiControl, method, argClasses);
-
+        if(task != null) {
             synchronized (tasksMonitor) {
-                tasks.add(new Task(uiControl, methodHandle, args));
+                tasks.add(task);
             }
-        } catch (NoSuchMethodException e) {
-            String classes = "";
-            for(Object arg : args) {
-                classes += ", " + arg.getClass();
-            }
-            classes = classes.substring(2);
-
-            System.err.println(String.format("The ui-element with the fxId \"%s\" " +
-                    "does not provide a method with the name \"%s\" and parameter " +
-                    "of classes \"%s\".", fxId, method, classes));
         }
+    }
+
+    /**
+     * Tries to generate a task from the given parameters.
+     * @param fxId      Id of the ui-element.
+     * @param method    Method to be called.
+     * @param args      Arguments the method expects.
+     * @return          Return-value of the method.
+     */
+    private Task getTask(String fxId, String method, Object[] args) {
+        Task task = null;
+        // Fetch parameter classes.
+        List<Class<?>> argClasses = new ArrayList<Class<?>>();
+        for(Object arg : args) {
+            argClasses.add(arg.getClass());
+        }
+
+        final Object uiControl = scene.lookup("#" + fxId);
+
+        if(uiControl != null) {
+            try {
+                final Method methodHandle =
+                        getMethod(uiControl, method, argClasses);
+
+                task = new Task(uiControl, methodHandle, args);
+            } catch (NoSuchMethodException e) {
+                String classes = "";
+                for(Object arg : args) {
+                    classes += ", " + arg.getClass();
+                }
+                classes = classes.substring(2);
+
+                System.err.println(String.format("The ui-element with the fxId \"%s\" " +
+                        "does not provide a method with the name \"%s\" and parameter " +
+                        "of classes \"%s\".", fxId, method, classes));
+            }
+        } else {
+            System.err.println(String.format("There is no ui-element with the " +
+                    "id: \"%s\" in this scene.", fxId));
+        }
+        return task;
     }
 
     @Override
@@ -99,42 +122,26 @@ public class JFxThread implements JFxThreadInterface {
     public Object applyTask(final String fxId, final String method,
                             final Object... args) {
         Object returnValue = null;
-        try {
-            // Fetch parameter classes.
-            List<Class<?>> argClasses = new ArrayList<Class<?>>();
-            for(Object arg : args) {
-                argClasses.add(arg.getClass());
-            }
 
-            final Object uiControl = scene.lookup("#" + fxId);
-            final java.lang.reflect.Method methodHandle =
-                    getMethod(uiControl, method, argClasses);
+        final Task task = getTask(fxId, method, args);
 
-            final Task task = new Task(uiControl, methodHandle, args);
-
+        if(task != null) {
             SyncTaskExecution syncTask = new SyncTaskExecution(task);
             Platform.runLater(syncTask);
 
-            // Wait till the result is available.
-            synchronized (syncTask.monitor) {
-                while(!syncTask.isExecutionFinished()) {
-                    syncTask.monitor.wait();
+            try {
+                // Wait till the result is available.
+                synchronized (syncTask.monitor) {
+                    while(!syncTask.isExecutionFinished()) {
+                        syncTask.monitor.wait();
+                    }
                 }
+            } catch (InterruptedException e) {
+                // do nothing
             }
             returnValue = syncTask.returnValue;
-        } catch (NoSuchMethodException e) {
-            String classes = "";
-            for(Object arg : args) {
-                classes += ", " + arg.getClass();
-            }
-            classes = classes.substring(2);
-
-            System.err.println(String.format("The ui-element with the fxId \"%s\" " +
-                    "does not provide a method with the name \"%s\" and parameter " +
-                    "of classes \"%s\".", fxId, method, classes));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
+
         return returnValue;
     }
 

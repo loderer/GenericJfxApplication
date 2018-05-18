@@ -35,7 +35,7 @@ public class Main extends Application {
     /**
      * This object allows changing the gui from MATLAB.
      */
-    private static JFxThread jfxThread;
+    private static JFxThread jfxThread; //TODO: jfxThread for each observable/scene
 
     /**
      * This flag indicates the initialization-status of the application.
