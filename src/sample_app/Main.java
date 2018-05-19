@@ -29,11 +29,10 @@ public class Main extends Application {
      */
     private static Stage primaryStage;
 
-    //TODO documentation
-    private static Map<String, Observable> observables;
+    private static Observable primaryStageObservable;
 
     //TODO documentation
-    private static Map<String, JFxThread> jfxThreads;
+    private static Map<Scene, Observable> observables;
 
     /**
      * This flag indicates the initialization-status of the application.
@@ -50,17 +49,16 @@ public class Main extends Application {
         // is closed. This enables restarting the application.
         Platform.setImplicitExit(false);
 
-        observables = new HashMap<String, Observable>();
-        observables.put(PRIMARY_STAGE_OBSERVABLE, new Observable());
+        primaryStageObservable = new Observable();
 
-        jfxThreads = new HashMap<String, JFxThread>();
+        observables = new HashMap<Scene, Observable>();
 
         primaryStage.setTitle(TITLE);
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
-                observables.get("primaryStage").notifyListeners("root", "CLOSE");
+                primaryStageObservable.notifyListeners("root", "CLOSE");
             }
         });
 
@@ -73,10 +71,8 @@ public class Main extends Application {
 
     public static UiHandle showScene(final String fxmlFile) {
         final Observable observable = new Observable();
-        observables.put(fxmlFile, observable);
 
         final JFxThread jfxThread = new JFxThread(fxmlFile);
-        jfxThreads.put(fxmlFile, jfxThread);
 
         Platform.runLater(new Runnable() {
             @Override
@@ -91,9 +87,16 @@ public class Main extends Application {
                     controller.setObservable(observable);
 
                     Scene scene = new Scene(root, 300, 275);
+
+                    if(observables.containsKey(primaryStage.getScene())) {
+                        observables.get(primaryStage.getScene()).notifyListeners("root", "CLOSE");
+                        observables.remove(primaryStage.getScene());
+                    }
+
                     primaryStage.setScene(scene);
                     primaryStage.show();
 
+                    observables.put(scene, observable);
                     jfxThread.setScene(scene);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -136,6 +139,6 @@ public class Main extends Application {
                 initialisationCompletedMonitor.wait();
             }
         }
-        return observables.get(PRIMARY_STAGE_OBSERVABLE);
+        return primaryStageObservable;
     }
 }
