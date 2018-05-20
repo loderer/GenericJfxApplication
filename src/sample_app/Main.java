@@ -68,8 +68,37 @@ public class Main extends Application {
         }
     }
 
+    public static StageHandle newStage(final String title) {
+        SyncStageCreation syncStageCreation = new SyncStageCreation(title);
+        Platform.runLater(syncStageCreation);
 
-    public static UiHandle showScene(final String fxmlFile) {
+        synchronized (syncStageCreation.getStageMonitor()) {
+            try {
+                while(syncStageCreation.getStage() == null) {
+                    syncStageCreation.getStageMonitor().wait();
+                }
+            } catch (InterruptedException e) {
+                // do nothing;
+            }
+        }
+
+        Stage stage = syncStageCreation.getStage();
+        final Observable observable = new Observable();
+
+        if(stage != null) {
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    observable.notifyListeners("root", "CLOSE");
+                }
+            });
+        }
+
+        return new StageHandle(observable, stage);
+    }
+
+
+    public static SceneHandle showScene(final Stage stage, final String fxmlFile) {
         final Observable observable = new Observable();
 
         final JFxThread jfxThread = new JFxThread(fxmlFile);
@@ -88,13 +117,13 @@ public class Main extends Application {
 
                     Scene scene = new Scene(root, 300, 275);
 
-                    if(observables.containsKey(primaryStage.getScene())) {
-                        observables.get(primaryStage.getScene()).notifyListeners("root", "CLOSE");
-                        observables.remove(primaryStage.getScene());
+                    if(observables.containsKey(stage.getScene())) {
+                        observables.get(stage.getScene()).notifyListeners("root", "CLOSE");
+                        observables.remove(stage.getScene());
                     }
 
-                    primaryStage.setScene(scene);
-                    primaryStage.show();
+                    stage.setScene(scene);
+                    stage.show();
 
                     observables.put(scene, observable);
                     jfxThread.setScene(scene);
@@ -104,7 +133,7 @@ public class Main extends Application {
             }
         });
 
-        return new UiHandle(observable, jfxThread);
+        return new SceneHandle(observable, jfxThread);
     }
 
     /**
@@ -125,7 +154,7 @@ public class Main extends Application {
      * @param args
      * @return Observable to listen for events on primaryStage level.
      */
-    public static Observable startGuiThread(final String[] args)
+    public static StageHandle startGuiThread(final String[] args)
             throws InterruptedException {
         new Thread(new Runnable() {
             @Override
@@ -139,6 +168,6 @@ public class Main extends Application {
                 initialisationCompletedMonitor.wait();
             }
         }
-        return primaryStageObservable;
+        return new StageHandle(primaryStageObservable, primaryStage);
     }
 }

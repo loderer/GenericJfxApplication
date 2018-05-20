@@ -4,13 +4,13 @@ import sample_app.events.Observable;
 import sample_app.jfxthread.JFxThread;
 import sample_app.jfxthread.JFxThreadInterface;
 
-public class UiHandle implements JFxThreadInterface {
+public class SceneHandle implements JFxThreadInterface {
 
     private final Observable observable;
 
     private final JFxThread jfxThread;
 
-    public UiHandle(final Observable observable, final JFxThread jfxThread) {
+    public SceneHandle(final Observable observable, final JFxThread jfxThread) {
         this.observable = observable;
         this.jfxThread = jfxThread;
     }
