@@ -21,7 +21,7 @@ public class Main extends Application {
     /**
      * Title of the application.
      */
-    private static final String TITLE = "Sample";
+    private static String primaryStageTitle = "";
     private static final String PRIMARY_STAGE_OBSERVABLE = "primaryStage";
 
     /**
@@ -53,7 +53,7 @@ public class Main extends Application {
 
         observables = new HashMap<Scene, Observable>();
 
-        primaryStage.setTitle(TITLE);
+        primaryStage.setTitle(primaryStageTitle);
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
@@ -138,11 +138,12 @@ public class Main extends Application {
 
     /**
      * Starts the ui. A call returns after application termination.
-     * @param args
+     * @param primaryStageTitle Initial title of the primary stage.
      */
-    private static void startGui(final String[] args) {
+    private static void startGui(final String primaryStageTitle) {
         try {
-            launch(args);
+            Main.primaryStageTitle = primaryStageTitle;
+            launch(new String[0]);
         } catch(IllegalStateException e) {
             // The ui is still running.
         }
@@ -151,15 +152,15 @@ public class Main extends Application {
     /**
      * Starts the ui in its own thread. A call returns if all public
      * properties are initialized.
-     * @param args
+     * @param primaryStageTitle Initial title of the primary stage.
      * @return Observable to listen for events on primaryStage level.
      */
-    public static StageHandle startGuiThread(final String[] args)
+    public static StageHandle startGuiThread(final String primaryStageTitle)
             throws InterruptedException {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                startGui(args);
+                startGui(primaryStageTitle);
             }
         }).start();
 
