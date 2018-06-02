@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample_app.events.Controller">
+<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample_app.events.Controller">
    <children>
-      <Label text="Detail" />
-      <Button fx:id="btn_clickMe" layoutX="5.0" layoutY="14.0" mnemonicParsing="false" onAction="#sendEvent" text="clickMe" />
+      <TextField fx:id="tf_name" promptText="name" />
+      <TextField fx:id="tf_surname" promptText="surname" />
+      <Button fx:id="btn_save" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendEvent" text="save" />
    </children>
-</AnchorPane>
+</VBox>

@@ -1,6 +1,7 @@
 package sample_app.jfxthread;
 
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +29,8 @@ public class JFxThread {
      * The corresponding fxml-file.
      */
     private final String fxmlFile;
+
+    private FXMLLoader fxmlLoader;
 
     public JFxThread(final String fxmlFile) {
         this.tasksMonitor = new Object();
@@ -80,7 +83,14 @@ public class JFxThread {
             argClasses.add(arg.getClass());
         }
 
-        final Object uiControl = scene.lookup("#" + fxId);
+        Object uiControl  = null;
+
+        if(fxmlLoader != null) {
+               uiControl = fxmlLoader.getNamespace().get(fxId);
+        } else {
+            System.err.println("FXMLLoader not set!!!");
+        }
+
 
         if(uiControl != null) {
             try {
@@ -196,5 +206,9 @@ public class JFxThread {
                     new MethodReflector(uiControl, method, argClasses);
             return mr.getMethod();
         }
+    }
+
+    public void setFxmlLoader(FXMLLoader fxmlLoader) {
+        this.fxmlLoader = fxmlLoader;
     }
 }

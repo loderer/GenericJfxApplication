@@ -3,16 +3,12 @@ package sample_app;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import sample_app.events.Controller;
 import sample_app.events.Observable;
 import sample_app.jfxthread.JFxThread;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,40 +94,34 @@ public class Main extends Application {
     }
 
 
-    public static SceneHandle showScene(final Stage stage, final String fxmlFile) {
+    public static SceneHandle showScene(final Stage stage, final String fxmlFile,
+                                        final double width, final double height ) {
         final Observable observable = new Observable();
 
         final JFxThread jfxThread = new JFxThread(fxmlFile);
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    FXMLLoader loader = new FXMLLoader();
-                    Parent root = loader.load(Main.class.getResource(fxmlFile)
-                            .openStream());
+        final SyncSceneCreation syncSceneCreation = new SyncSceneCreation(stage, fxmlFile, width, height, observable);
 
-                    Controller controller =
-                            (Controller) loader.getController();
-                    controller.setObservable(observable);
+        Platform.runLater(syncSceneCreation);
 
-                    Scene scene = new Scene(root, 300, 275);
-
-                    if(observables.containsKey(stage.getScene())) {
-                        observables.get(stage.getScene()).notifyListeners("root", "CLOSE");
-                        observables.remove(stage.getScene());
-                    }
-
-                    stage.setScene(scene);
-                    stage.show();
-
-                    observables.put(scene, observable);
-                    jfxThread.setScene(scene);
-                } catch (IOException e) {
-                    e.printStackTrace();
+        synchronized (syncSceneCreation.getSceneMonitor()) {
+            try {
+                while(syncSceneCreation.getNewScene() == null) {
+                    syncSceneCreation.getSceneMonitor().wait();
                 }
+            } catch (InterruptedException e) {
+                // do nothing;
             }
-        });
+        }
+
+        if(observables.containsKey(syncSceneCreation.getOldScene())) {
+            observables.get(syncSceneCreation.getOldScene()).notifyListeners("root", "CLOSE");
+            observables.remove(syncSceneCreation.getOldScene());
+        }
+
+        observables.put(syncSceneCreation.getNewScene(), observable);
+        jfxThread.setScene(syncSceneCreation.getNewScene());
+        jfxThread.setFxmlLoader(syncSceneCreation.getFxmlLoader());
 
         return new SceneHandle(observable, jfxThread);
     }
