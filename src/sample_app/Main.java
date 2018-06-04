@@ -98,7 +98,7 @@ public class Main extends Application {
                                         final double width, final double height ) {
         final Observable observable = new Observable();
 
-        final JFxThread jfxThread = new JFxThread(fxmlFile);
+        final JFxThread jfxThread = new JFxThread(fxmlFile, stage);
 
         final SyncSceneCreation syncSceneCreation = new SyncSceneCreation(stage, fxmlFile, width, height, observable);
 

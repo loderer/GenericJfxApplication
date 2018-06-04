@@ -3,6 +3,7 @@ package sample_app.jfxthread;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,12 +31,15 @@ public class JFxThread {
      */
     private final String fxmlFile;
 
+    private final Stage stage;
+
     private FXMLLoader fxmlLoader;
 
-    public JFxThread(final String fxmlFile) {
+    public JFxThread(final String fxmlFile, final Stage stage) {
         this.tasksMonitor = new Object();
         this.tasks = new ArrayList<Task>();
         this.fxmlFile = fxmlFile;
+        this.stage = stage;
     }
 
     public void setScene(final Scene scene ){
@@ -210,5 +214,14 @@ public class JFxThread {
 
     public void setFxmlLoader(FXMLLoader fxmlLoader) {
         this.fxmlLoader = fxmlLoader;
+    }
+
+    public void closeStage() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                stage.close();
+            }
+        });
     }
 }
