@@ -10,13 +10,13 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Allows the invocation of any available method on each existing ui-element
+ * Allows the invocation of any available method on each existing ui element
  * from MATLAB.
  */
 public class JFxThread {
 
     /**
-     * Scene housing the ui-elements.
+     * Scene housing the ui elements.
      */
     private Scene scene;
 
@@ -48,22 +48,22 @@ public class JFxThread {
 
     /**
      * Deposit a task without parameters.
-     * @param fxId      The ui-element to invoke the method on.
-     * @param method    The method to be invoked on the ui-element.
+     * @param uiElement      The ui element to invoke the method on.
+     * @param method    The method to be invoked on the ui element.
      */
-    public void pushBackTask(final String fxId, final String method){
-        pushBackTask(fxId, method, new Object[0]);
+    public void pushBackTask(final Object uiElement, final String method){
+        pushBackTask(uiElement, method, new Object[0]);
     }
 
     /**
      * Deposit a task.
-     * @param fxId      The ui-element to invoke the method on.
-     * @param method    The method to be invoked on the ui-element.
+     * @param uiElement      The ui element to invoke the method on.
+     * @param method    The method to be invoked on the ui element.
      * @param args      The arguments of the method.
      */
-    public void pushBackTask(final String fxId, final String method,
+    public void pushBackTask(final Object uiElement, final String method,
                              final Object... args){
-        Task task = getTask(fxId, method, args);
+        Task task = getTask(uiElement, method, args);
 
         if(task != null) {
             synchronized (tasksMonitor) {
@@ -73,13 +73,30 @@ public class JFxThread {
     }
 
     /**
+     * Traces an ui element.
+     * @param fxId The id of the required ui element.
+     * @return The ui element with the specified id or null if
+     * not ui element with the given id exists.
+     * @throws Exception If the fxmlloader is not initialized.
+     */
+    public Object getUiElement(final String fxId) throws Exception {
+        Object uiElement = null;
+        if(fxmlLoader != null) {
+            uiElement = fxmlLoader.getNamespace().get(fxId);
+        } else {
+            throw new Exception("FXMLLoader not initialized!");
+        }
+        return uiElement;
+    }
+
+    /**
      * Tries to generate a task from the given parameters.
-     * @param fxId      Id of the ui-element.
+     * @param fxId      Id of the ui element.
      * @param method    Method to be called.
      * @param args      Arguments the method expects.
      * @return          Return-value of the method.
      */
-    private Task getTask(String fxId, String method, Object[] args) {
+    private Task getTask(final Object uiElement, String method, Object[] args) {
         Task task = null;
         // Fetch parameter classes.
         List<Class<?>> argClasses = new ArrayList<Class<?>>();
@@ -87,21 +104,12 @@ public class JFxThread {
             argClasses.add(arg.getClass());
         }
 
-        Object uiControl  = null;
-
-        if(fxmlLoader != null) {
-               uiControl = fxmlLoader.getNamespace().get(fxId);
-        } else {
-            System.err.println("FXMLLoader not set!!!");
-        }
-
-
-        if(uiControl != null) {
+        if(uiElement != null) {
             try {
                 final Method methodHandle =
-                        getMethod(uiControl, method, argClasses);
+                        getMethod(uiElement, method, argClasses);
 
-                task = new Task(uiControl, methodHandle, args);
+                task = new Task(uiElement, methodHandle, args);
             } catch (NoSuchMethodException e) {
                 String classes = "";
                 for(Object arg : args) {
@@ -109,14 +117,13 @@ public class JFxThread {
                 }
                 classes = classes.substring(2);
 
-                System.err.println(String.format("The ui-element does not " +
+                System.err.println(String.format("The ui element does not " +
                         "provide a method with the name \"%s\" and parameter " +
-                        "of classes \"%s\". (fxId: %s, fxml: %s)", method,
-                        classes, fxId, fxmlFile));
+                        "of classes \"%s\". (fxml: %s)", method,
+                        classes, fxmlFile));
             }
         } else {
-            System.err.println(String.format("There is no ui-element with the " +
-                    "id: \"%s\" in this scene. (fxml: %s)", fxId, fxmlFile));
+            throw new IllegalArgumentException("UiElement should be non null. ");
         }
         return task;
     }
@@ -148,26 +155,26 @@ public class JFxThread {
 
     /**
      * Run a task without parameters synchronous.
-     * @param fxId      The ui-element to invoke the method on.
-     * @param method    The method to be invoked on the ui-element.
+     * @param uiElement      The ui element to invoke the method on.
+     * @param method    The method to be invoked on the ui element.
      * @return          Result of the method invocation.
      */
-    public Object applyTask(final String fxId, final String method) {
-        return applyTask(fxId, method, new Object[0]);
+    public Object applyTask(final Object uiElement, final String method) {
+        return applyTask(uiElement, method, new Object[0]);
     }
 
     /**
      * Run a task with parameters synchronous.
-     * @param fxId      The ui-element to invoke the method on.
-     * @param method    The method to be invoked on the ui-element.
+     * @param uiElement      The ui element to invoke the method on.
+     * @param method    The method to be invoked on the ui element.
      * @param args      The arguments of the method.
      * @return          Result of the method invocation.
      */
-    public Object applyTask(final String fxId, final String method,
+    public Object applyTask(final Object uiElement, final String method,
                             final Object... args) {
         Object returnValue = null;
 
-        final Task task = getTask(fxId, method, args);
+        final Task task = getTask(uiElement, method, args);
 
         if(task != null) {
             SyncTaskExecution syncTask = new SyncTaskExecution(task);
@@ -191,23 +198,23 @@ public class JFxThread {
 
     /**
      * Fetch a method matching the given signature.
-     * @param uiControl     The ui-element to invoke the method on.
+     * @param uiElement     The ui element to invoke the method on.
      * @param method        The methods name.
      * @param argClasses    The classes of the parameter.
      * @return              A method matching the given signature.
      * @throws NoSuchMethodException    If no method matches the signature.
      */
-    private Method getMethod(Object uiControl, String method,
+    private Method getMethod(Object uiElement, String method,
                              List<Class<?>> argClasses)
             throws NoSuchMethodException {
         if(argClasses.size() == 0) {
-            return uiControl.getClass().getMethod(method,
+            return uiElement.getClass().getMethod(method,
                     argClasses.toArray(new Class<?>[0]));
         } else {
             // Consider super-classes, interfaces and primitives while
             // reflecting method.
             MethodReflector mr =
-                    new MethodReflector(uiControl, method, argClasses);
+                    new MethodReflector(uiElement, method, argClasses);
             return mr.getMethod();
         }
     }
