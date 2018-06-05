@@ -37,6 +37,16 @@ public class Main extends Application {
     private static boolean initialisationCompleted = false;
     private static final Object initialisationCompletedMonitor = new Object();
 
+    public static void setOnCloseRequest(final Observable observable, final Stage stage) {
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                observable.notifyListeners("root", "CLOSE");
+                event.consume();
+            }
+        });
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception{
         // Save primary stage to enable restarting the application.
@@ -82,12 +92,7 @@ public class Main extends Application {
         final Observable observable = new Observable();
 
         if(stage != null) {
-            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                @Override
-                public void handle(WindowEvent event) {
-                    observable.notifyListeners("root", "CLOSE");
-                }
-            });
+            setOnCloseRequest(observable, stage);
         }
 
         return new StageHandle(observable, stage);
@@ -159,6 +164,8 @@ public class Main extends Application {
                 initialisationCompletedMonitor.wait();
             }
         }
+
+        setOnCloseRequest(primaryStageObservable, primaryStage);
         return new StageHandle(primaryStageObservable, primaryStage);
     }
 }
