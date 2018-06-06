@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import sample_app.events.Observable;
@@ -36,6 +37,7 @@ public class Main extends Application {
      */
     private static boolean initialisationCompleted = false;
     private static final Object initialisationCompletedMonitor = new Object();
+    private static Stage primaryStageParent;
 
     public static void setOnCloseRequest(final Observable observable, final Stage stage) {
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -68,6 +70,11 @@ public class Main extends Application {
             }
         });
 
+        if(primaryStageParent != null) {
+            primaryStage.initOwner(primaryStageParent);
+            primaryStage.initModality(Modality.WINDOW_MODAL);
+        }
+
         synchronized (initialisationCompletedMonitor) {
             initialisationCompleted = true;
             initialisationCompletedMonitor.notify();
@@ -75,6 +82,10 @@ public class Main extends Application {
     }
 
     public static StageHandle newStage(final String title) {
+        return newStage(title, null);
+    }
+
+    public static StageHandle newStage(final String title, final Stage parentStage) {
         SyncStageCreation syncStageCreation = new SyncStageCreation(title);
         Platform.runLater(syncStageCreation);
 
@@ -93,6 +104,11 @@ public class Main extends Application {
 
         if(stage != null) {
             setOnCloseRequest(observable, stage);
+        }
+
+        if(parentStage != null) {
+            stage.initOwner(parentStage);
+            stage.initModality(Modality.WINDOW_MODAL);
         }
 
         return new StageHandle(observable, stage);
@@ -144,14 +160,20 @@ public class Main extends Application {
         }
     }
 
+    public static StageHandle startGuiThread(final String primaryStageTitle)
+            throws InterruptedException {
+        return startGuiThread(primaryStageTitle, null);
+    }
+
     /**
      * Starts the ui in its own thread. A call returns if all public
      * properties are initialized.
      * @param primaryStageTitle Initial title of the primary stage.
      * @return Observable to listen for events on primaryStage level.
      */
-    public static StageHandle startGuiThread(final String primaryStageTitle)
+    public static StageHandle startGuiThread(final String primaryStageTitle, final Stage parentStage)
             throws InterruptedException {
+        Main.primaryStageParent = parentStage;
         new Thread(new Runnable() {
             @Override
             public void run() {
