@@ -22,6 +22,6 @@ public class JsonCellValueFactory extends PropertyValueFactory<String, String> {
     @Override
     public ObservableValue<String> call(TableColumn.CellDataFeatures<String, String> param) {
         JSONObject jsonObject = new JSONObject(param.getValue());
-        return new ReadOnlyStringWrapper((String) jsonObject.get(getProperty()));
+        return new ReadOnlyStringWrapper(jsonObject.get(getProperty()).toString());
     }
 }
