@@ -6,7 +6,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.json.JSONObject;
 
-public class JsonCellValueFactory extends PropertyValueFactory<String, String> {
+public class JsonTableCellValueFactory extends PropertyValueFactory<String, String> {
 
     /**
      * Creates a default PropertyValueFactory to extract the value from a given
@@ -15,7 +15,7 @@ public class JsonCellValueFactory extends PropertyValueFactory<String, String> {
      * @param property The name of the property with which to attempt to
      *                 reflectively extract a corresponding value for in a given object.
      */
-    public JsonCellValueFactory(String property) {
+    public JsonTableCellValueFactory(String property) {
         super(property);
     }
 
