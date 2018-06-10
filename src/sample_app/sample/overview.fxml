@@ -14,6 +14,7 @@
             <Button fx:id="btn_editEntry" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendEvent" text="edit entry" HBox.hgrow="ALWAYS" />
             <Button fx:id="btn_save" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendEvent" text="save" HBox.hgrow="ALWAYS" />
             <Button fx:id="btn_switchToList" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendEvent" text="switch to list" HBox.hgrow="ALWAYS" />
+            <Button fx:id="btn_switchToPlot" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendEvent" text="switch to plot" HBox.hgrow="ALWAYS" />
          </children>
       </HBox>
       <TableView fx:id="table" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="500.0" prefWidth="500.0" VBox.vgrow="ALWAYS">
