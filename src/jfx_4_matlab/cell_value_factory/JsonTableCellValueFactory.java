@@ -1,4 +1,4 @@
-package sample_app;
+package jfx_4_matlab.cell_value_factory;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
@@ -6,6 +6,11 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.json.JSONObject;
 
+/**
+ * Cell value factory which allows filling a table view from MATLAB.
+ * Because no custom MATLAB objects can be sent to java json strings
+ * are transferred.
+ */
 public class JsonTableCellValueFactory extends PropertyValueFactory<String, String> {
 
     /**

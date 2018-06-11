@@ -1,10 +1,10 @@
-package sample_app.jfxthread;
+package jfx_4_matlab.jfxthread;
 
 import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Uses reflection to determine a method. Additionally considers
+ * Uses reflection to determine a method. Considers
  * super-classes, interfaces and primitives.
  */
 public class MethodReflector {
@@ -26,9 +26,9 @@ public class MethodReflector {
     };
 
     /**
-     * The ui-element to determine method for.
+     * The object to determine method for.
      */
-    private final Object uiControl;
+    private final Object object;
 
     /**
      * The name of the required method.
@@ -56,9 +56,9 @@ public class MethodReflector {
      */
     private List<Class<?>> actPermutation;
 
-    public MethodReflector(Object uiControl, String method, List<Class<?>> argClasses) {
+    public MethodReflector(Object object, String method, List<Class<?>> argClasses) {
 
-        this.uiControl = uiControl;
+        this.object = object;
         this.method = method;
         this.argClasses = argClasses;
 
@@ -106,7 +106,7 @@ public class MethodReflector {
      */
     public Method getMethod() throws NoSuchMethodException {
         try {
-            return uiControl.getClass().getMethod(method, actPermutation.toArray(new Class<?>[0]));
+            return object.getClass().getMethod(method, actPermutation.toArray(new Class<?>[0]));
         } catch (NoSuchMethodException e) {
             if(nextPermutation(0))
                 return getMethod();

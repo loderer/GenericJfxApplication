@@ -1,8 +1,11 @@
-package sample_app;
+package jfx_4_matlab.handle;
 
 import javafx.stage.Stage;
-import sample_app.events.Observable;
+import jfx_4_matlab.event_transfer.Observable;
 
+/**
+ * Contains all stage data which is required at the MATLAB application.
+ */
 public class StageHandle {
 
     private final Observable observable;

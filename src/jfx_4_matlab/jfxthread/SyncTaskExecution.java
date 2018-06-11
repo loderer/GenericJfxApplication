@@ -1,10 +1,10 @@
-package sample_app.jfxthread;
+package jfx_4_matlab.jfxthread;
 
 import java.lang.reflect.InvocationTargetException;
 
 /**
  * The application requires the synchronous execution of an runnable to easily
- * fetch information from the gui. This implementation allows to wait till the
+ * fetch information from the gui. This implementation allows to wait until the
  * execution has finished. It also enables fetching the result of the executed
  * task.
  */

@@ -1,7 +1,7 @@
-package sample_app.jfxthread;
+package jfx_4_matlab.jfxthread;
 
 /**
- * A task represents the invocation of a method on an ui-element.
+ * A task represents the invocation of a method on an object.
  */
 public class Task {
     /**

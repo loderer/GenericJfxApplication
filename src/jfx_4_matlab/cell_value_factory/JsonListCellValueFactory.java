@@ -1,14 +1,25 @@
-package sample_app;
+package jfx_4_matlab.cell_value_factory;
 
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 import org.json.JSONObject;
 
+/**
+ * Cell value factory which allows filling a list view from MATLAB.
+ * Because no custom MATLAB objects can be sent to java json strings
+ * are transferred.
+ */
 public class JsonListCellValueFactory implements Callback<ListView<String>,ListCell<String>> {
 
+    /**
+     * The property of the json to be shown.
+     */
     private final String property;
 
+    /**
+     * @param property  The property of the json to be shown.
+     */
     public JsonListCellValueFactory(final String property) {
         this.property = property;
     }
@@ -18,7 +29,7 @@ public class JsonListCellValueFactory implements Callback<ListView<String>,ListC
         return new ListItem(property);
     }
 
-    static class ListItem extends ListCell<String> {
+    private static class ListItem extends ListCell<String> {
         final String property;
 
         public ListItem(String property) {

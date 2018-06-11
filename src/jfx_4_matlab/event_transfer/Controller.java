@@ -1,10 +1,10 @@
-package sample_app.events;
+package jfx_4_matlab.event_transfer;
 
 import javafx.event.Event;
 import javafx.scene.control.Control;
 
 /**
- * Each controllers base class. It allows to send events via the observable.
+ * Each controllers base class. It allows to send event_transfer via the observable.
  */
 public class Controller {
 

@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample_app.events.Controller">
+<VBox xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jfx_4_matlab.event_transfer.Controller">
    <children>
       <TextField fx:id="tf_name" promptText="name" />
       <TextField fx:id="tf_surname" promptText="surname" />
