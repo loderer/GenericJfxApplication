@@ -15,6 +15,7 @@ import jfx_4_matlab.handle.SceneHandle;
 import jfx_4_matlab.handle.StageHandle;
 import jfx_4_matlab.jfxthread.JFXThread;
 
+import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -282,11 +283,15 @@ public class JFXApplication extends Application {
         public void run() {
             try {
                 FXMLLoader tmpLoader = new FXMLLoader();
-                URL fxmlUrl = JFXApplication.class.getResource(fxmlFile);
-                if(fxmlUrl == null) {
+
+                Parent root = null;
+                File file = new File(fxmlFile);
+                if (file.canRead()) {
+                    URL url = file.toURI().toURL();
+                    root = tmpLoader.load(url.openStream());
+                } else {
                     throw new Exception(String.format("No fxml file \"%s\" does exist.", fxmlFile));
                 }
-                Parent root = tmpLoader.load(fxmlUrl.openStream());
 
                 Controller controller =
                         (Controller) tmpLoader.getController();
