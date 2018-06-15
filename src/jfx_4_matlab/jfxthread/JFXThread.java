@@ -31,6 +31,9 @@ public class JFXThread {
      */
     private FXMLLoader fxmlLoader;
 
+    /**
+     * @param fxmlFile  The fxmlFile of the handled scene.
+     */
     public JFXThread(final String fxmlFile) {
         this.tasksMonitor = new Object();
         this.tasks = new ArrayList<Task>();
@@ -195,7 +198,7 @@ public class JFXThread {
      * @return              A method matching the given signature.
      * @throws NoSuchMethodException    If no method matches the signature.
      */
-    private Method getMethod(Object object, String method,
+    Method getMethod(Object object, String method,
                              List<Class<?>> argClasses)
             throws NoSuchMethodException {
         if(argClasses.size() == 0) {

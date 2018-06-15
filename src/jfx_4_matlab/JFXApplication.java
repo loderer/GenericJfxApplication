@@ -26,7 +26,6 @@ public class JFXApplication extends Application {
      * Title of the application.
      */
     private static String primaryStageTitle = "";
-
     /**
      * Primary stage of the application.
      */
@@ -35,18 +34,54 @@ public class JFXApplication extends Application {
      * Observable of the primary stage.
      */
     private static Observable primaryStageObservable;
-
     /**
      * Contains each running scene and its appropriate observable.
      */
-    private static Map<Scene, Observable> observables;
-
+    private static Map<Scene, Observable> scene2Observable;
     /**
      * This flag indicates the initialization-status of the application.
      * The attributes are initialized if the flag is set.
      */
     private static boolean initialisationCompleted = false;
     private static final Object initialisationCompletedMonitor = new Object();
+
+    /**
+     * Starts the ui in its own thread. A call returns if all
+     * properties are initialized.
+     * @param primaryStageTitle Title of the primary stage.
+     * @return Observable to listen for an event_transfer on primaryStage.
+     */
+    public StageHandle startGuiThread(final String primaryStageTitle)
+            throws InterruptedException {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                startGui(primaryStageTitle);
+            }
+        }).start();
+
+        synchronized (initialisationCompletedMonitor) {
+            while(!initialisationCompleted) {
+                initialisationCompletedMonitor.wait();
+            }
+        }
+
+        setOnCloseRequest(primaryStageObservable, primaryStage);
+        return new StageHandle(primaryStageObservable, primaryStage);
+    }
+
+    /**
+     * Starts the ui. A call returns after application termination.
+     * @param primaryStageTitle Title of the primary stage.
+     */
+    public void startGui(final String primaryStageTitle) {
+        try {
+            JFXApplication.primaryStageTitle = primaryStageTitle;
+            launch();
+        } catch(IllegalStateException e) {
+            // The ui is still running.
+        }
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -56,17 +91,17 @@ public class JFXApplication extends Application {
         // is closed. This enables restarting the application.
         Platform.setImplicitExit(false);
 
-        primaryStageObservable = new Observable();
+        JFXApplication.primaryStageObservable = new Observable();
 
-        observables = new HashMap<Scene, Observable>();
+        JFXApplication.scene2Observable = new HashMap<>();
 
-        primaryStage.setTitle(primaryStageTitle);
+        primaryStage.setTitle(JFXApplication.primaryStageTitle);
 
-        setOnCloseRequest(primaryStageObservable, primaryStage);
+        setOnCloseRequest(JFXApplication.primaryStageObservable, primaryStage);
 
-        synchronized (initialisationCompletedMonitor) {
-            initialisationCompleted = true;
-            initialisationCompletedMonitor.notify();
+        synchronized (JFXApplication.initialisationCompletedMonitor) {
+            JFXApplication.initialisationCompleted = true;
+            JFXApplication.initialisationCompletedMonitor.notify();
         }
     }
 
@@ -75,7 +110,7 @@ public class JFXApplication extends Application {
      * @param observable    Observable to be notified.
      * @param stage         The stage to be observed.
      */
-    public static void setOnCloseRequest(final Observable observable,
+    private void setOnCloseRequest(final Observable observable,
                                          final Stage stage) {
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
@@ -91,7 +126,7 @@ public class JFXApplication extends Application {
      * @param title The title of the stage.
      * @return  The appropriate stage handle.
      */
-    public static StageHandle newStage(final String title) throws Exception {
+    public StageHandle newStage(final String title) throws Exception {
         return newStage(title, null);
     }
 
@@ -101,7 +136,7 @@ public class JFXApplication extends Application {
      * @param parentStage   The parent stage.
      * @return  The appropriate stage handle.
      */
-    public static StageHandle newStage(final String title,
+    public StageHandle newStage(final String title,
                                        final Stage parentStage) throws Exception {
         SyncStageCreation syncStageCreation = new SyncStageCreation(title);
         Platform.runLater(syncStageCreation);
@@ -140,19 +175,16 @@ public class JFXApplication extends Application {
      * Creates a new scene.
      * @param stage The stage of the scene to be created.
      * @param fxmlFile  The appropriate fxml file.
-     * @param width The width of the scene.
-     * @param height    The height of the scene.
      * @return  The appropriate scene handle.
      */
-    public static SceneHandle showScene(final Stage stage, final String fxmlFile,
-            final double width, final double height )
+    public SceneHandle showScene(final Stage stage, final String fxmlFile)
             throws Exception {
         final Observable observable = new Observable();
 
         final JFXThread jfxThread = new JFXThread(fxmlFile);
 
         final SyncSceneCreation syncSceneCreation =
-                new SyncSceneCreation(stage, fxmlFile, width, height, observable);
+                new SyncSceneCreation(stage, fxmlFile, observable);
 
         Platform.runLater(syncSceneCreation);
 
@@ -171,54 +203,23 @@ public class JFXApplication extends Application {
             throw syncSceneCreation.getException();
         }
 
-        if(observables.containsKey(syncSceneCreation.getOldScene())) {
-            observables.get(syncSceneCreation.getOldScene())
+        if(scene2Observable.containsKey(syncSceneCreation.getOldScene())) {
+            scene2Observable.get(syncSceneCreation.getOldScene())
                     .notifyListeners("root", "CLOSE");
-            observables.remove(syncSceneCreation.getOldScene());
+            scene2Observable.remove(syncSceneCreation.getOldScene());
         }
 
-        observables.put(syncSceneCreation.getNewScene(), observable);
+        scene2Observable.put(syncSceneCreation.getNewScene(), observable);
         jfxThread.setFxmlLoader(syncSceneCreation.getFxmlLoader());
 
         return new SceneHandle(observable, jfxThread);
     }
 
     /**
-     * Starts the ui. A call returns after application termination.
-     * @param primaryStageTitle Title of the primary stage.
+     * Enable the test mode.
      */
-    private static void startGui(final String primaryStageTitle) {
-        try {
-            JFXApplication.primaryStageTitle = primaryStageTitle;
-            launch(new String[0]);
-        } catch(IllegalStateException e) {
-            // The ui is still running.
-        }
-    }
-
-    /**
-     * Starts the ui in its own thread. A call returns if all
-     * properties are initialized.
-     * @param primaryStageTitle Title of the primary stage.
-     * @return Observable to listen for an event_transfer on primaryStage.
-     */
-    public static StageHandle startGuiThread(final String primaryStageTitle)
-            throws InterruptedException {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                startGui(primaryStageTitle);
-            }
-        }).start();
-
-        synchronized (initialisationCompletedMonitor) {
-            while(!initialisationCompleted) {
-                initialisationCompletedMonitor.wait();
-            }
-        }
-
-        setOnCloseRequest(primaryStageObservable, primaryStage);
-        return new StageHandle(primaryStageObservable, primaryStage);
+    public void enableTestMode() {
+        // TODO: Prevent windows from opening or do not even create them.
     }
 
     // nested classes =========================================================
@@ -227,7 +228,7 @@ public class JFXApplication extends Application {
     /**
      * Allows creating a new scene on the JavaFX Application Thread synchronous.
      */
-    public static class SyncSceneCreation extends Thread{
+    public class SyncSceneCreation extends Thread{
 
         /**
          * The stage of the scene.
@@ -237,14 +238,6 @@ public class JFXApplication extends Application {
          * The appropriate fxml file.
          */
         private final String fxmlFile;
-        /**
-         * The width of the scene.
-         */
-        private final double width;
-        /**
-         * The height of the scene.
-         */
-        private final double height;
         /**
          * The observable which propagates the events of the scene.
          */
@@ -270,12 +263,10 @@ public class JFXApplication extends Application {
          */
         private Exception exception;
 
-        public SyncSceneCreation(Stage stage, String fxmlFile, double width,
-                                 double height, Observable observable) {
+        public SyncSceneCreation(Stage stage, String fxmlFile,
+                                 Observable observable) {
             this.stage = stage;
             this.fxmlFile = fxmlFile;
-            this.width = width;
-            this.height = height;
             this.observable = observable;
         }
 
@@ -284,7 +275,7 @@ public class JFXApplication extends Application {
             try {
                 FXMLLoader tmpLoader = new FXMLLoader();
 
-                Parent root = null;
+                Parent root;
                 File file = new File(fxmlFile);
                 if (file.canRead()) {
                     URL url = file.toURI().toURL();
@@ -297,7 +288,7 @@ public class JFXApplication extends Application {
                         (Controller) tmpLoader.getController();
                 controller.setObservable(observable);
 
-                Scene tmpNewScene = new Scene(root, width, height);
+                Scene tmpNewScene = new Scene(root);
                 Scene tmpOldScene = stage.getScene();
 
                 stage.setScene(tmpNewScene);
@@ -342,7 +333,7 @@ public class JFXApplication extends Application {
     /**
      * Allows creating a new stage on the JavaFX Application Thread synchronous.
      */
-    public static class SyncStageCreation implements Runnable {
+    public class SyncStageCreation implements Runnable {
 
         /**
          * The title of the stage.
