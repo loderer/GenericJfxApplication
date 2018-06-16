@@ -279,7 +279,8 @@ public class JFXApplication extends Application {
                 File file = new File(fxmlFile);
                 if (file.canRead()) {
                     URL url = file.toURI().toURL();
-                    root = tmpLoader.load(url.openStream());
+                    tmpLoader.setLocation(url);
+                    root = tmpLoader.load();
                 } else {
                     throw new Exception(String.format("No fxml file \"%s\" does exist.", fxmlFile));
                 }
