@@ -51,7 +51,7 @@ public class JFXApplication extends Application {
      * @param primaryStageTitle Title of the primary stage.
      * @return Observable to listen for an event_transfer on primaryStage.
      */
-    public StageHandle startGuiThread(final String primaryStageTitle)
+    public StageHandle startGuiAsynchronous(final String primaryStageTitle)
             throws InterruptedException {
         new Thread(new Runnable() {
             @Override
