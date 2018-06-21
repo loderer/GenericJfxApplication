@@ -45,44 +45,6 @@ public class JFXApplication extends Application {
     private static boolean initializationCompleted = false;
     private static final Object initializationCompletedMonitor = new Object();
 
-    /**
-     * Starts the ui in its own thread. A call returns if all
-     * properties are initialized.
-     * @param stageTitle Title of the primary stage.
-     * @return Observable to listen for an event_transfer on primaryStage.
-     */
-    public StageHandle startGuiAsynchronous(final String stageTitle)
-            throws InterruptedException {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                startGui(stageTitle);
-            }
-        }).start();
-
-        synchronized (initializationCompletedMonitor) {
-            while(!initializationCompleted) {
-                initializationCompletedMonitor.wait();
-            }
-        }
-
-        setOnCloseRequest(primaryStageObservable, primaryStage);
-        return new StageHandle(primaryStageObservable, primaryStage);
-    }
-
-    /**
-     * Starts the ui. A call returns after application termination.
-     * @param stageTitle Title of the primary stage.
-     */
-    public void startGui(final String stageTitle) {
-        try {
-            JFXApplication.primaryStageTitle = stageTitle;
-            launch();
-        } catch(IllegalStateException e) {
-            // The ui is still running.
-        }
-    }
-
     @Override
     public void start(Stage primaryStage) throws Exception{
         // Save primary stage to enable restarting the application.
@@ -101,7 +63,7 @@ public class JFXApplication extends Application {
 
         synchronized (JFXApplication.initializationCompletedMonitor) {
             JFXApplication.initializationCompleted = true;
-            JFXApplication.initializationCompletedMonitor.notify();
+            JFXApplication.initializationCompletedMonitor.notifyAll();
         }
     }
 
@@ -131,13 +93,41 @@ public class JFXApplication extends Application {
     }
 
     /**
-     * Creates a new modal stage. The given stage is the parent stage.
+     * Creates a new stage. The new stage is modal if a parent stage is given.
      * @param title The title of the stage to be created.
-     * @param parentStage   The parent stage.
+     * @param parentStage   The parent stage or null.
      * @return  The appropriate stage handle.
      */
     public StageHandle newStage(final String title,
                                        final Stage parentStage) throws Exception {
+        boolean initializationCompleted = false;
+        synchronized (initializationCompletedMonitor) {
+            initializationCompleted = JFXApplication.initializationCompleted;
+        }
+
+        StageHandle stageHandle;
+
+        if(initializationCompleted) {
+            stageHandle = createAnotherStage(title, parentStage);
+        } else {
+            if(parentStage != null) {
+                throw new IllegalArgumentException("The first stage can not have a parent.");
+            }
+            stageHandle = createPrimaryStage(title);
+        }
+        return stageHandle;
+    }
+
+    /**
+     * Creates each stage except the primary stage. The new stage is modal if
+     * a parent stage is given.
+     * @param title The title of the stage.
+     * @param parentStage   The parent stage or null.
+     * @return  The appropriate stage handle.
+     * @throws Exception
+     */
+    private StageHandle createAnotherStage(String title, Stage parentStage) throws Exception {
+        StageHandle stageHandle;
         SyncStageCreation syncStageCreation = new SyncStageCreation(title);
         Platform.runLater(syncStageCreation);
 
@@ -168,7 +158,33 @@ public class JFXApplication extends Application {
             stage.initModality(Modality.WINDOW_MODAL);
         }
 
-        return new StageHandle(observable, stage);
+        stageHandle =  new StageHandle(observable, stage);
+        return stageHandle;
+    }
+
+    /**
+     * Starts the ui in its own thread. Also creates the primary stage. A call
+     * returns if all properties are initialized.
+     * @param stageTitle Title of the primary stage.
+     * @return Observable to listen for an event on the primaryStage.
+     */
+    private StageHandle createPrimaryStage(final String stageTitle)
+            throws Exception {
+        SyncApplicationInitialization syncApplicationInitialization = new SyncApplicationInitialization(stageTitle);
+        new Thread(syncApplicationInitialization).start();
+
+        synchronized (initializationCompletedMonitor) {
+            while(!initializationCompleted) {
+                initializationCompletedMonitor.wait();
+            }
+        }
+
+        if(syncApplicationInitialization.getException() != null) {
+            throw syncApplicationInitialization.getException();
+        }
+
+        setOnCloseRequest(primaryStageObservable, primaryStage);
+        return new StageHandle(primaryStageObservable, primaryStage);
     }
 
     /**
@@ -301,12 +317,12 @@ public class JFXApplication extends Application {
                     this.newScene = tmpNewScene;
                     this.oldScene = tmpOldScene;
                     this.fxmlLoader = tmpLoader;
-                    sceneMonitor.notify();
+                    sceneMonitor.notifyAll();
                 }
             } catch (Exception e) {
                 this.exception = e;
                 synchronized (sceneMonitor) {
-                    sceneMonitor.notify();
+                    sceneMonitor.notifyAll();
                 }
             }
         }
@@ -367,12 +383,12 @@ public class JFXApplication extends Application {
 
                 synchronized (stageMonitor) {
                     this.stage = tmpStage;
-                    stageMonitor.notify();
+                    stageMonitor.notifyAll();
                 }
             } catch (Exception e) {
                 synchronized (stageMonitor) {
                     this.exception = e;
-                    stageMonitor.notify();
+                    stageMonitor.notifyAll();
                 }
             }
         }
@@ -383,6 +399,50 @@ public class JFXApplication extends Application {
 
         public Object getStageMonitor() {
             return stageMonitor;
+        }
+
+        public Exception getException() {
+            return exception;
+        }
+    }
+
+    // SyncApplicationInitialization ------------------------------------------
+    /**
+     * Allows launching the application in its own thread.
+     */
+    public class SyncApplicationInitialization implements Runnable {
+
+        /**
+         * The title of the primary stage.
+         */
+        private final String title;
+        /**
+         * Any exception occurred while execution is in progress.
+         */
+        private Exception exception;
+
+        public SyncApplicationInitialization(final String title) {
+            this.title = title;
+        }
+
+        @Override
+        public void run() {
+            try {
+                JFXApplication.primaryStageTitle = title;
+                launch(JFXApplication.class);
+            } catch(IllegalStateException e) {
+                // The ui is still running.
+                synchronized (JFXApplication.initializationCompletedMonitor) {
+                    JFXApplication.initializationCompleted = true;
+                    JFXApplication.initializationCompletedMonitor.notifyAll();
+                }
+            } catch(Exception e) {
+                exception = e;
+                synchronized (JFXApplication.initializationCompletedMonitor) {
+                    JFXApplication.initializationCompleted = true;
+                    JFXApplication.initializationCompletedMonitor.notifyAll();
+                }
+            }
         }
 
         public Exception getException() {
