@@ -42,27 +42,27 @@ public class JFXApplication extends Application {
      * This flag indicates the initialization-status of the application.
      * The attributes are initialized if the flag is set.
      */
-    private static boolean initialisationCompleted = false;
-    private static final Object initialisationCompletedMonitor = new Object();
+    private static boolean initializationCompleted = false;
+    private static final Object initializationCompletedMonitor = new Object();
 
     /**
      * Starts the ui in its own thread. A call returns if all
      * properties are initialized.
-     * @param primaryStageTitle Title of the primary stage.
+     * @param stageTitle Title of the primary stage.
      * @return Observable to listen for an event_transfer on primaryStage.
      */
-    public StageHandle startGuiAsynchronous(final String primaryStageTitle)
+    public StageHandle startGuiAsynchronous(final String stageTitle)
             throws InterruptedException {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                startGui(primaryStageTitle);
+                startGui(stageTitle);
             }
         }).start();
 
-        synchronized (initialisationCompletedMonitor) {
-            while(!initialisationCompleted) {
-                initialisationCompletedMonitor.wait();
+        synchronized (initializationCompletedMonitor) {
+            while(!initializationCompleted) {
+                initializationCompletedMonitor.wait();
             }
         }
 
@@ -72,11 +72,11 @@ public class JFXApplication extends Application {
 
     /**
      * Starts the ui. A call returns after application termination.
-     * @param primaryStageTitle Title of the primary stage.
+     * @param stageTitle Title of the primary stage.
      */
-    public void startGui(final String primaryStageTitle) {
+    public void startGui(final String stageTitle) {
         try {
-            JFXApplication.primaryStageTitle = primaryStageTitle;
+            JFXApplication.primaryStageTitle = stageTitle;
             launch();
         } catch(IllegalStateException e) {
             // The ui is still running.
@@ -99,9 +99,9 @@ public class JFXApplication extends Application {
 
         setOnCloseRequest(JFXApplication.primaryStageObservable, primaryStage);
 
-        synchronized (JFXApplication.initialisationCompletedMonitor) {
-            JFXApplication.initialisationCompleted = true;
-            JFXApplication.initialisationCompletedMonitor.notify();
+        synchronized (JFXApplication.initializationCompletedMonitor) {
+            JFXApplication.initializationCompleted = true;
+            JFXApplication.initializationCompletedMonitor.notify();
         }
     }
 
@@ -287,7 +287,9 @@ public class JFXApplication extends Application {
 
                 Controller controller =
                         (Controller) tmpLoader.getController();
-                controller.setObservable(observable);
+                if(controller != null) {
+                    controller.setObservable(observable);
+                }
 
                 Scene tmpNewScene = new Scene(root);
                 Scene tmpOldScene = stage.getScene();

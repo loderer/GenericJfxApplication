@@ -198,7 +198,7 @@ public class JFXThread {
      * @return              A method matching the given signature.
      * @throws NoSuchMethodException    If no method matches the signature.
      */
-    Method getMethod(Object object, String method,
+    private Method getMethod(Object object, String method,
                              List<Class<?>> argClasses)
             throws NoSuchMethodException {
         if(argClasses.size() == 0) {
