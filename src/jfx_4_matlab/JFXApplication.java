@@ -85,31 +85,6 @@ public class JFXApplication extends Application {
     }
 
     /**
-     * Creates a new non-modal stage.
-     * @param title The title of the stage to be created.
-     * @return  The appropriate stage handle.
-     */
-    public StageHandle createStage(final String title) throws Exception {
-        return createStage(title, Modality.NONE, null);
-    }
-
-    /**
-     * Allows creating non-modal and application-modal stages. To create a
-     * window-modal stage also an owner has to be specified.
-     * @param title The title of the stage to be created.
-     * @param modality The modality of the stage.
-     * @return  The appropriate stage handle.
-     */
-    public StageHandle createStage(final String title,
-                                   final Modality modality) throws Exception {
-        if(modality == Modality.WINDOW_MODAL) {
-            throw new IllegalArgumentException("If the stage should be set " +
-                    "window-modal an owner has to be given.");
-        }
-        return createStage(title, modality, null);
-    }
-
-    /**
      * Creates a new stage. The parameters modality and owner control the
      * modality of the stage.
      * @param title The title of the stage to be created.
