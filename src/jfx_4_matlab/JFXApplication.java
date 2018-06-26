@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import jfx_4_matlab.event_transfer.Controller;
 import jfx_4_matlab.event_transfer.Observable;
@@ -93,13 +94,13 @@ public class JFXApplication extends Application {
     }
 
     /**
-     * Creates a new stage. The new stage is modal if a parent stage is given.
+     * Creates a new stage. The new stage is modal if an owner is given.
      * @param title The title of the stage to be created.
-     * @param parentStage   The parent stage or null.
+     * @param owner   The owner of this stage or null.
      * @return  The appropriate stage handle.
      */
     public StageHandle newStage(final String title,
-                                       final Stage parentStage) throws Exception {
+                                       final Window owner) throws Exception {
         boolean initializationCompleted = false;
         synchronized (initializationCompletedMonitor) {
             initializationCompleted = JFXApplication.initializationCompleted;
@@ -108,10 +109,10 @@ public class JFXApplication extends Application {
         StageHandle stageHandle;
 
         if(initializationCompleted) {
-            stageHandle = createAnotherStage(title, parentStage);
+            stageHandle = createAnotherStage(title, owner);
         } else {
-            if(parentStage != null) {
-                throw new IllegalArgumentException("The first stage can not have a parent.");
+            if(owner != null) {
+                throw new IllegalArgumentException("The first stage can not have an owner.");
             }
             stageHandle = createPrimaryStage(title);
         }
@@ -120,13 +121,13 @@ public class JFXApplication extends Application {
 
     /**
      * Creates each stage except the primary stage. The new stage is modal if
-     * a parent stage is given.
+     * an owner is given.
      * @param title The title of the stage.
-     * @param parentStage   The parent stage or null.
+     * @param owner   The owner of this stage or null.
      * @return  The appropriate stage handle.
      * @throws Exception
      */
-    private StageHandle createAnotherStage(String title, Stage parentStage) throws Exception {
+    private StageHandle createAnotherStage(String title, Window owner) throws Exception {
         StageHandle stageHandle;
         SyncStageCreation syncStageCreation = new SyncStageCreation(title);
         Platform.runLater(syncStageCreation);
@@ -153,8 +154,8 @@ public class JFXApplication extends Application {
             setOnCloseRequest(observable, stage);
         }
 
-        if(parentStage != null) {
-            stage.initOwner(parentStage);
+        if(owner != null) {
+            stage.initOwner(owner);
             stage.initModality(Modality.WINDOW_MODAL);
         }
 
