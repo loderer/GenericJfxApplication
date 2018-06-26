@@ -231,13 +231,6 @@ public class JFXApplication extends Application {
         return new SceneHandle(observable, jfxThread);
     }
 
-    /**
-     * Enable the test mode.
-     */
-    public void enableTestMode() {
-        // TODO: Prevent windows from opening or do not even create them.
-    }
-
     // nested classes =========================================================
 
     // SyncSceneCreation ------------------------------------------------------
