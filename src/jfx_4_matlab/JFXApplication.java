@@ -86,21 +86,45 @@ public class JFXApplication extends Application {
 
     /**
      * Creates a new non-modal stage.
-     * @param title The title of the stage.
+     * @param title The title of the stage to be created.
      * @return  The appropriate stage handle.
      */
-    public StageHandle newStage(final String title) throws Exception {
-        return newStage(title, null);
+    public StageHandle createStage(final String title) throws Exception {
+        return createStage(title, Modality.NONE, null);
     }
 
     /**
-     * Creates a new stage. The new stage is modal if an owner is given.
+     * Allows creating non-modal and application-modal stages. To create a
+     * window-modal stage also an owner has to be specified.
      * @param title The title of the stage to be created.
+     * @param modality The modality of the stage.
+     * @return  The appropriate stage handle.
+     */
+    public StageHandle createStage(final String title,
+                                   final Modality modality) throws Exception {
+        if(modality == Modality.WINDOW_MODAL) {
+            throw new IllegalArgumentException("If the stage should be set " +
+                    "window-modal an owner has to be given.");
+        }
+        return createStage(title, modality, null);
+    }
+
+    /**
+     * Creates a new stage. The parameters modality and owner control the
+     * modality of the stage.
+     * @param title The title of the stage to be created.
+     * @param modality The modality of the stage.
      * @param owner   The owner of this stage or null.
      * @return  The appropriate stage handle.
      */
-    public StageHandle newStage(final String title,
-                                       final Window owner) throws Exception {
+    public StageHandle createStage(final String title,
+                                    final Modality modality,
+                                    final Window owner) throws Exception {
+        if(modality == Modality.WINDOW_MODAL && owner == null) {
+            throw new IllegalArgumentException("If the stage should be set " +
+                    "window-modal an owner must be given.");
+        }
+
         boolean initializationCompleted = false;
         synchronized (initializationCompletedMonitor) {
             initializationCompleted = JFXApplication.initializationCompleted;
@@ -109,10 +133,10 @@ public class JFXApplication extends Application {
         StageHandle stageHandle;
 
         if(initializationCompleted) {
-            stageHandle = createAnotherStage(title, owner);
+            stageHandle = createAnotherStage(title, modality, owner);
         } else {
-            if(owner != null) {
-                throw new IllegalArgumentException("The first stage can not have an owner.");
+            if(!modality.equals(Modality.NONE)) {
+                throw new IllegalArgumentException("The first stage has to be non-modal.");
             }
             stageHandle = createPrimaryStage(title);
         }
@@ -123,11 +147,14 @@ public class JFXApplication extends Application {
      * Creates each stage except the primary stage. The new stage is modal if
      * an owner is given.
      * @param title The title of the stage.
+     * @param modality The modality of the stage.
      * @param owner   The owner of this stage or null.
      * @return  The appropriate stage handle.
      * @throws Exception
      */
-    private StageHandle createAnotherStage(String title, Window owner) throws Exception {
+    private StageHandle createAnotherStage(String title,
+                                           final Modality modality,
+                                           Window owner) throws Exception {
         StageHandle stageHandle;
         SyncStageCreation syncStageCreation = new SyncStageCreation(title);
         Platform.runLater(syncStageCreation);
@@ -154,9 +181,17 @@ public class JFXApplication extends Application {
             setOnCloseRequest(observable, stage);
         }
 
-        if(owner != null) {
-            stage.initOwner(owner);
-            stage.initModality(Modality.WINDOW_MODAL);
+        switch (modality) {
+            case NONE:
+                stage.initModality(Modality.NONE);
+                break;
+            case WINDOW_MODAL:
+                stage.initOwner(owner);
+                stage.initModality(Modality.WINDOW_MODAL);
+                break;
+            case APPLICATION_MODAL:
+                stage.initModality(Modality.APPLICATION_MODAL);
+                break;
         }
 
         stageHandle =  new StageHandle(observable, stage);
