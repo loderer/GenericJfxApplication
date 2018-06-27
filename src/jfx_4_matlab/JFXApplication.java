@@ -78,7 +78,7 @@ public class JFXApplication extends Application {
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
-                observable.notifyListeners("root", "CLOSE");
+                observable.notifyObserver("root", "CLOSE");
                 event.consume();
             }
         });
@@ -232,7 +232,7 @@ public class JFXApplication extends Application {
 
         if(scene2Observable.containsKey(syncSceneCreation.getOldScene())) {
             scene2Observable.get(syncSceneCreation.getOldScene())
-                    .notifyListeners("root", "CLOSE");
+                    .notifyObserver("root", "CLOSE");
             scene2Observable.remove(syncSceneCreation.getOldScene());
         }
 

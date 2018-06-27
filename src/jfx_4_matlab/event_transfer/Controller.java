@@ -9,13 +9,13 @@ import javafx.scene.control.Control;
 public class Controller {
 
     /**
-     * Will be executionFinished if notifyListeners is called.
+     * Will be notified if handleEvent is called.
      */
     private Observable observable;
 
     /**
      * Init Controller
-     * @param observable    This observable will be executionFinished if notifyListeners is called.
+     * @param observable    This observable will be notified if handleEvent is called.
      */
     public void setObservable(final Observable observable) {
         this.observable = observable;
@@ -23,10 +23,10 @@ public class Controller {
 
     /**
      * Notifies each observer of the observable.
-     * @param evt
+     * @param evt   Event to be published.
      */
-    public void notifyListeners(Event evt) {
-        observable.notifyListeners(
+    public void handleEvent(Event evt) {
+        observable.notifyObserver(
                 ((Control)evt.getSource()).getId(),
                 evt.getEventType().getName());
     }
