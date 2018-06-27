@@ -46,5 +46,37 @@ public class Observable {
                 );
         }
     }
+
+    /**
+     * This interface has to be implemented by each observer listening for events
+     * on the Observable class.
+     */
+    public interface Observer extends java.util.EventListener {
+        void notify(Event event);
+    }
+
+    /**
+     * Events to be transferred.
+     */
+    public class Event extends java.util.EventObject {
+
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * FxId of the control which initially threw the event_transfer.
+         */
+        public String fxId;
+
+        /**
+         * The action called on the control.
+         */
+        public String action;
+
+        Event(Object obj, String fxId, String action) {
+            super(obj);
+            this.fxId = fxId;
+            this.action = action;
+        }
+    }
 }
 
