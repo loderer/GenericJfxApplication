@@ -26,7 +26,7 @@ public class Controller {
      * @param evt   Event to be published.
      */
     public void handleEvent(Event evt) {
-        observable.notifyObserver(
+        observable.notifyListeners(
                 ((Control)evt.getSource()).getId(),
                 evt.getEventType().getName());
     }
