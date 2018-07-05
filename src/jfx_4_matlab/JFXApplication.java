@@ -14,7 +14,7 @@ import jfx_4_matlab.event_transfer.Controller;
 import jfx_4_matlab.event_transfer.Observable;
 import jfx_4_matlab.handle.SceneHandle;
 import jfx_4_matlab.handle.StageHandle;
-import jfx_4_matlab.jfxthread.JFXThread;
+import jfx_4_matlab.jfx_thread.JFXThread;
 
 import java.io.File;
 import java.net.URL;

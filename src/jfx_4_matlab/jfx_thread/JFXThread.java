@@ -1,4 +1,4 @@
-package jfx_4_matlab.jfxthread;
+package jfx_4_matlab.jfx_thread;
 
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
