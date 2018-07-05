@@ -1,4 +1,4 @@
-package jfx_4_matlab.cell_value_factory;
+package jfx_4_matlab_java.cell_value_factory;
 
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;

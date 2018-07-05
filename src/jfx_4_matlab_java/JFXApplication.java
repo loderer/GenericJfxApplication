@@ -1,4 +1,4 @@
-package jfx_4_matlab;
+package jfx_4_matlab_java;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -10,11 +10,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import jfx_4_matlab.event_transfer.Controller;
-import jfx_4_matlab.event_transfer.Observable;
-import jfx_4_matlab.handle.SceneHandle;
-import jfx_4_matlab.handle.StageHandle;
-import jfx_4_matlab.jfx_thread.JFXThread;
+import jfx_4_matlab_java.event_transfer.Controller;
+import jfx_4_matlab_java.event_transfer.Observable;
+import jfx_4_matlab_java.handle.SceneHandle;
+import jfx_4_matlab_java.handle.StageHandle;
+import jfx_4_matlab_java.jfx_thread.JFXThread;
 
 import java.io.File;
 import java.net.URL;

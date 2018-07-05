@@ -1,4 +1,4 @@
-package jfx_4_matlab.jfx_thread;
+package jfx_4_matlab_java.jfx_thread;
 
 /**
  * A task represents the invocation of a method on an object.

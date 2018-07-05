@@ -1,7 +1,7 @@
-package jfx_4_matlab.handle;
+package jfx_4_matlab_java.handle;
 
-import jfx_4_matlab.event_transfer.Observable;
-import jfx_4_matlab.jfx_thread.JFXThread;
+import jfx_4_matlab_java.event_transfer.Observable;
+import jfx_4_matlab_java.jfx_thread.JFXThread;
 
 /**
  * Contains all scene data which is required at the MATLAB application.

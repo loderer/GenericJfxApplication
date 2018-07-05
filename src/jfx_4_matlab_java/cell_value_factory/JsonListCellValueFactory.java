@@ -1,4 +1,4 @@
-package jfx_4_matlab.cell_value_factory;
+package jfx_4_matlab_java.cell_value_factory;
 
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;

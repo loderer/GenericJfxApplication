@@ -1,4 +1,4 @@
-package jfx_4_matlab.jfx_thread;
+package jfx_4_matlab_java.jfx_thread;
 
 import java.lang.reflect.Method;
 import java.util.*;

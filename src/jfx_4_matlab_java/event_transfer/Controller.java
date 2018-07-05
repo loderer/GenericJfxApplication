@@ -1,4 +1,4 @@
-package jfx_4_matlab.event_transfer;
+package jfx_4_matlab_java.event_transfer;
 
 import javafx.event.Event;
 import javafx.scene.control.Control;

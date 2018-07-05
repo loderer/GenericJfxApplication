@@ -1,4 +1,4 @@
-package jfx_4_matlab.event_transfer;
+package jfx_4_matlab_java.event_transfer;
 
 /**
  * Events to be transferred.
