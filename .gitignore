@@ -22,7 +22,6 @@
 hs_err_pid*
 
 .idea
-.target
+target/
 out
 *.iml
-target/test-classes/mockito-extensions/org.mockito.plugins.MockMaker
