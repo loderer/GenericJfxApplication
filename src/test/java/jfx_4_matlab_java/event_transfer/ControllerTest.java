@@ -31,7 +31,6 @@ public class ControllerTest {
         Control control = Mockito.mock(Control.class);
         Mockito.when(control.getId()).thenReturn("btn");
         Mockito.when(event.getSource()).thenReturn(control);
-        // mock to generate a Event like this new Event(this, "btn", "ACTION")
 
         controller.handleEvent(event);
 
