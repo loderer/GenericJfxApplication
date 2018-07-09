@@ -29,7 +29,7 @@ public class JsonListCellValueFactory implements Callback<ListView<String>,ListC
         return new ListItem(property);
     }
 
-    private static class ListItem extends ListCell<String> {
+    public static class ListItem extends ListCell<String> {
         final String property;
 
         public ListItem(String property) {
@@ -43,7 +43,7 @@ public class JsonListCellValueFactory implements Callback<ListView<String>,ListC
         @Override
         public void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
-            if (item != null) {
+            if (!empty && item != null) {
                 JSONObject jsonObject = new JSONObject(item);
                 setText(jsonObject.get(getProperty()).toString());
             }

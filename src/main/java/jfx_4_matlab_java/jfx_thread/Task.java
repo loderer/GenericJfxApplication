@@ -1,5 +1,7 @@
 package jfx_4_matlab_java.jfx_thread;
 
+import java.lang.reflect.Method;
+
 /**
  * A task represents the invocation of a method on an object.
  */
@@ -7,21 +9,33 @@ public class Task {
     /**
      * FxId of an ui element.
      */
-    public final Object uiControl;
+    private final Object object;
 
     /**
      * Name of the method to be called on the ui element.
      */
-    public final java.lang.reflect.Method method;
+    private final java.lang.reflect.Method method;
 
     /**
      * Input parameter of the method.
      */
-    public final Object[] args;
+    private final Object[] args;
 
-    public Task(final Object uiControl, final java.lang.reflect.Method method, final Object[] args) {
-        this.uiControl = uiControl;
+    public Task(final Object object, final java.lang.reflect.Method method, final Object[] args) {
+        this.object = object;
         this.method = method;
         this.args = args;
+    }
+
+    public Object getObject() {
+        return object;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public Object[] getArgs() {
+        return args;
     }
 }

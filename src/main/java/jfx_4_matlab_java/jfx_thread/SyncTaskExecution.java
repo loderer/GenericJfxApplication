@@ -44,13 +44,17 @@ public class SyncTaskExecution implements Runnable{
     }
 
     public boolean isExecutionFinished() {
-        return executionFinished;
+        synchronized (monitor) {
+            return executionFinished;
+        }
     }
 
     @Override
     public void run() {
         try {
-            returnValue = task.method.invoke(task.uiControl, task.args);
+            if(!Thread.interrupted()) {
+                returnValue = task.getMethod().invoke(task.getObject(), task.getArgs());
+            }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {

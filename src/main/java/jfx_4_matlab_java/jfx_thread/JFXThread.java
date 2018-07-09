@@ -138,7 +138,7 @@ public class JFXThread {
                             task = iterator.next();
                             iterator.remove();
                         }
-                        task.method.invoke(task.uiControl, task.args);
+                        task.getMethod().invoke(task.getObject(), task.getArgs());
                     }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     e.printStackTrace();
