@@ -1,10 +1,10 @@
 package jfx_4_matlab_java.event_transfer;
 
-import javafx.event.EventType;
 import javafx.event.Event;
+import javafx.event.EventType;
 import javafx.scene.control.Control;
 import org.mockito.Mockito;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.mockito.BDDMockito.given;
@@ -15,7 +15,7 @@ public class ControllerTest {
     private Observable observable;
     private Controller controller;
 
-    @BeforeTest
+    @BeforeMethod
     public void setUp() {
         this.observable = Mockito.mock(Observable.class);
         this.controller = new Controller();

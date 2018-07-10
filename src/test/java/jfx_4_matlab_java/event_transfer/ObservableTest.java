@@ -2,7 +2,7 @@ package jfx_4_matlab_java.event_transfer;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -15,7 +15,7 @@ public class ObservableTest {
     private Observable observable;
     private EventListener eventListener;
 
-    @BeforeTest
+    @BeforeMethod
     public void setUp() {
         this.observable = new Observable();
         this.eventListener = Mockito.mock(EventListener.class);

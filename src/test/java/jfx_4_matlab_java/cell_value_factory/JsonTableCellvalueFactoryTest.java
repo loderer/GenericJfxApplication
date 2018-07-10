@@ -3,7 +3,7 @@ package jfx_4_matlab_java.cell_value_factory;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import org.mockito.Mockito;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -22,7 +22,7 @@ public class JsonTableCellvalueFactoryTest {
     private JsonTableCellValueFactory sut;
     private TableColumn.CellDataFeatures<String, String> param;
 
-    @BeforeTest
+    @BeforeMethod
     public void setUp() {
         sut = new JsonTableCellValueFactory(PROPERTY);
         param =

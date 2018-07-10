@@ -45,7 +45,7 @@ public class JFXThread {
      * @param object    The object to invoke the method on.
      * @param method    The method to be invoked on the object.
      */
-    public void pushBackTask(final Object object, final String method){
+    public void pushBackTask(final Object object, final String method) throws NoSuchMethodException {
         pushBackTask(object, method, new Object[0]);
     }
 
@@ -56,7 +56,7 @@ public class JFXThread {
      * @param args      The arguments of the method.
      */
     public void pushBackTask(final Object object, final String method,
-                             final Object... args){
+                             final Object... args) throws NoSuchMethodException {
         Task task = getTask(object, method, args);
 
         if(task != null) {
@@ -71,14 +71,14 @@ public class JFXThread {
      * @param fxId The id of the required ui element.
      * @return The ui element with the specified id or null if
      * no ui element with the given id exists.
-     * @throws Exception If the fxml loader is not initialized.
+     * @throws NullPointerException If the fxml loader is not initialized.
      */
-    public Object getUiElement(final String fxId) throws Exception {
+    public Object getUiElement(final String fxId) throws NullPointerException {
         Object uiElement = null;
         if(fxmlLoader != null) {
             uiElement = fxmlLoader.getNamespace().get(fxId);
         } else {
-            throw new Exception("FXMLLoader not initialized!");
+            throw new NullPointerException("FXMLLoader not initialized!");
         }
         return uiElement;
     }
@@ -90,7 +90,7 @@ public class JFXThread {
      * @param args      Arguments the method expects.
      * @return          Generated task.
      */
-    private Task getTask(final Object object, String method, Object[] args) {
+    private Task getTask(final Object object, String method, Object[] args) throws NoSuchMethodException {
         Task task = null;
         // Fetch parameter classes.
         List<Class<?>> argClasses = new ArrayList<Class<?>>();
@@ -109,9 +109,11 @@ public class JFXThread {
                 for(Object arg : args) {
                     classes += ", " + arg.getClass();
                 }
-                classes = classes.substring(2);
+                if(!classes.isEmpty()) {
+                    classes = classes.substring(2);
+                }
 
-                System.err.println(String.format("The class \"%s\" does not " +
+                throw new NoSuchMethodException(String.format("The class \"%s\" does not " +
                         "provide a method with the name \"%s\" and parameter " +
                         "of classes \"%s\". (fxml: %s)", object.getClass().toString(),
                         method, classes, fxmlFile));
@@ -153,7 +155,7 @@ public class JFXThread {
      * @param method    The method to be invoked on the object.
      * @return          Result of the method invocation.
      */
-    public Object applyTask(final Object object, final String method) {
+    public Object applyTask(final Object object, final String method) throws NoSuchMethodException {
         return applyTask(object, method, new Object[0]);
     }
 
@@ -165,7 +167,7 @@ public class JFXThread {
      * @return          Result of the method invocation.
      */
     public Object applyTask(final Object object, final String method,
-                            final Object... args) {
+                            final Object... args) throws NoSuchMethodException {
         Object returnValue = null;
 
         final Task task = getTask(object, method, args);

@@ -43,13 +43,6 @@ public class SyncTaskExecution implements Runnable{
         }
     }
 
-    public boolean isExecutionFinished() {
-        synchronized (monitor) {
-            return executionFinished;
-        }
-    }
-
-
     /**
      * Waits until the task-execution has been finished.
      * @throws InterruptedException

@@ -96,8 +96,7 @@ public class JFXApplication extends Application {
                                     final Modality modality,
                                     final Window owner) throws Exception {
         if(modality == Modality.WINDOW_MODAL && owner == null) {
-            throw new IllegalArgumentException("If the stage should be set " +
-                    "window-modal an owner must be given.");
+            throw new IllegalArgumentException("A window-modal stage must have an owner.");
         }
 
         boolean initializationCompleted = false;
@@ -248,7 +247,7 @@ public class JFXApplication extends Application {
     /**
      * Allows creating a new scene on the JavaFX Application Thread synchronous.
      */
-    public class SyncSceneCreation extends Thread{
+    private class SyncSceneCreation extends Thread{
 
         /**
          * The stage of the scene.
@@ -356,7 +355,7 @@ public class JFXApplication extends Application {
     /**
      * Allows creating a new stage on the JavaFX Application Thread synchronous.
      */
-    public class SyncStageCreation implements Runnable {
+    private class SyncStageCreation implements Runnable {
 
         /**
          * The title of the stage.
@@ -414,7 +413,7 @@ public class JFXApplication extends Application {
     /**
      * Allows launching the application in its own thread.
      */
-    public class SyncApplicationInitialization implements Runnable {
+    private class SyncApplicationInitialization implements Runnable {
 
         /**
          * The title of the primary stage.

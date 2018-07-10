@@ -3,7 +3,7 @@ package jfx_4_matlab_java.cell_value_factory;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import org.mockito.Mockito;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
@@ -23,7 +23,7 @@ public class JsonListCellValueFactoryTest {
     private ListCell<String> listCell;
     private JsonListCellValueFactory.ListItem listItem;
 
-    @BeforeTest
+    @BeforeMethod
     public void setUp() {
         JsonListCellValueFactory sut = new JsonListCellValueFactory(PROPERTY);
         ListView listView = Mockito.mock(ListView.class);
