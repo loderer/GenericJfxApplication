@@ -19,12 +19,12 @@ public class SyncTaskExecution implements Runnable{
      * Flag indicating if the execution has finished.
      */
     private boolean executionFinished;
-    public Object monitor;
+    private final Object monitor;
 
     /**
      * Return value of the task.
      */
-    public Object returnValue;
+    private Object returnValue;
 
     public SyncTaskExecution(final Task task) {
         this.task = task;
@@ -36,7 +36,7 @@ public class SyncTaskExecution implements Runnable{
     /**
      * Publishes that the execution has finished and the return value is available.
      */
-    public void finishExecution() {
+    private void finishExecution() {
         synchronized (monitor) {
             executionFinished = true;
             monitor.notify();
@@ -49,15 +49,30 @@ public class SyncTaskExecution implements Runnable{
         }
     }
 
+
+    /**
+     * Waits until the task-execution has been finished.
+     * @throws InterruptedException
+     */
+    public void waitTillExecutionIsFinished() throws InterruptedException {
+        synchronized (monitor) {
+            while(!executionFinished) {
+                monitor.wait();
+            }
+        }
+    }
+
+    public Object getReturnValue() {
+        return returnValue;
+    }
+
     @Override
     public void run() {
         try {
             if(!Thread.interrupted()) {
                 returnValue = task.getMethod().invoke(task.getObject(), task.getArgs());
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         finishExecution();

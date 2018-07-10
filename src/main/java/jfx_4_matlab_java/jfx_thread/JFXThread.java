@@ -175,16 +175,11 @@ public class JFXThread {
             Platform.runLater(syncTask);
 
             try {
-                // Wait till the result is available.
-                synchronized (syncTask.monitor) {
-                    while(!syncTask.isExecutionFinished()) {
-                        syncTask.monitor.wait();
-                    }
-                }
+                syncTask.waitTillExecutionIsFinished();
             } catch (InterruptedException e) {
                 // do nothing
             }
-            returnValue = syncTask.returnValue;
+            returnValue = syncTask.getReturnValue();
         }
 
         return returnValue;
