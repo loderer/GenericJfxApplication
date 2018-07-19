@@ -21,6 +21,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This javaFX application allows its configuration from another application.
+ * The other application can configure, create, observe, change and close
+ * stages and scenes at runtime.
+ */
 public class GenericJfxApplication extends Application {
 
     /**
