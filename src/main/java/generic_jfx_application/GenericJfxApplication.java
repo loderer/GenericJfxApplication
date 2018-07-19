@@ -1,5 +1,10 @@
 package generic_jfx_application;
 
+import generic_jfx_application.event_transfer.Controller;
+import generic_jfx_application.event_transfer.Observable;
+import generic_jfx_application.handle.SceneHandle;
+import generic_jfx_application.handle.StageHandle;
+import generic_jfx_application.jfx_thread.JFXThread;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -10,11 +15,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import generic_jfx_application.event_transfer.Controller;
-import generic_jfx_application.event_transfer.Observable;
-import generic_jfx_application.handle.SceneHandle;
-import generic_jfx_application.handle.StageHandle;
-import generic_jfx_application.jfx_thread.JFXThread;
 
 import java.io.File;
 import java.net.URL;
@@ -306,7 +306,7 @@ public class GenericJfxApplication extends Application {
                     tmpLoader.setLocation(url);
                     root = tmpLoader.load();
                 } else {
-                    throw new Exception(String.format("No fxml file \"%s\" does exist.", fxmlFile));
+                    throw new IllegalArgumentException(String.format("The fxml file \"%s\" does not exist.", fxmlFile));
                 }
 
                 Controller controller =
@@ -438,12 +438,6 @@ public class GenericJfxApplication extends Application {
             try {
                 GenericJfxApplication.primaryStageTitle = title;
                 launch(GenericJfxApplication.class);
-            } catch(IllegalStateException e) {
-                // The ui is still running.
-                synchronized (GenericJfxApplication.initializationCompletedMonitor) {
-                    GenericJfxApplication.initializationCompleted = true;
-                    GenericJfxApplication.initializationCompletedMonitor.notifyAll();
-                }
             } catch(Exception e) {
                 exception = e;
                 synchronized (GenericJfxApplication.initializationCompletedMonitor) {
