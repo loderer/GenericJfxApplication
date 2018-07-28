@@ -96,6 +96,7 @@ public class GenericJfxApplication extends Application {
      * @param modality The modality of the stage.
      * @param owner   The owner of this stage or null.
      * @return  The appropriate stage handle.
+     * @throws Exception If the stage-creation throws any exception.
      */
     public StageHandle createStage(final String title,
                                     final Modality modality,
@@ -129,7 +130,7 @@ public class GenericJfxApplication extends Application {
      * @param modality The modality of the stage.
      * @param owner   The owner of this stage or null.
      * @return  The appropriate stage handle.
-     * @throws Exception
+     * @throws Exception If the stage-creation throws any exception.
      */
     private StageHandle createAnotherStage(String title,
                                            final Modality modality,
@@ -182,9 +183,9 @@ public class GenericJfxApplication extends Application {
      * returns if all properties are initialized.
      * @param stageTitle Title of the primary stage.
      * @return Observable to listen for an event on the primaryStage.
+     * @throws Exception If the stage-initialization throws any exception.
      */
-    private StageHandle createPrimaryStage(final String stageTitle)
-            throws Exception {
+    private StageHandle createPrimaryStage(final String stageTitle) throws Exception {
         SyncApplicationInitialization syncApplicationInitialization = new SyncApplicationInitialization(stageTitle);
         new Thread(syncApplicationInitialization).start();
 
@@ -207,9 +208,9 @@ public class GenericJfxApplication extends Application {
      * @param stage The stage of the scene to be created.
      * @param fxmlFile  The appropriate fxml file.
      * @return  The appropriate scene handle.
+     * @throws Exception If the scene-creation throws any exception.
      */
-    public SceneHandle showScene(final Stage stage, final String fxmlFile)
-            throws Exception {
+    public SceneHandle showScene(final Stage stage, final String fxmlFile) throws Exception {
         final Observable observable = new Observable();
 
         final JFXThread jfxThread = new JFXThread(fxmlFile);
